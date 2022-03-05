@@ -1,0 +1,2 @@
+FLASK_APP=amaldistoria.py
+FLASK_ENV=development

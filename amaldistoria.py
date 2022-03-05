@@ -1,0 +1,1 @@
+from amaldiapp import app
