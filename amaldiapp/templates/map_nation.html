@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+
+{% block app_content %}
+  <div class="row">
+
+    <div class="col-sm-12">
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur
+      </p>
+    </div>
+
+    <div class="col-sm-12">
+
+    <div class="well">
+
+      <form method="post">
+        <div class="row">
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label for="selanno">Anno scolastico</label>
+              <select class="form-control" id="selanno" name="anno" onchange="this.form.submit()">
+              	{# <option value=""> All </option> #}
+                {% for val in params|reverse %}
+              	  {% if val == request.anno or val == param %}
+              	  <option value="{{val}}" selected> {{val}} </option>
+              	  {% else %}
+              	  <option value="{{val}}"> {{val}} </option>
+              	  {% endif %}
+              	{% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label for="selnation">Cittadinanza</label>
+              <select class="form-control" id="selnation" name="nationalita" onchange="this.form.submit()">
+                  <option value=""> All </option>
+                  {% for cittadinanza in nation %}
+                  {% if cittadinanza == request.nationalita %}
+                  <option value="{{cittadinanza}}" selected> {{cittadinanza}} </option>
+                  {% else %}
+                  <option value="{{cittadinanza}}"> {{cittadinanza}} </option>
+                  {% endif %}
+                  {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label for="selstato">Stato alunno</label>
+              <select class="form-control" id="selstato" name="stato_alunno" onchange="this.form.submit()">
+                  <option value=""> All </option>
+                  {% for stato in stato_alunno %}
+                  {% if stato == request.stato_alunno %}
+                  <option value="{{stato}}" selected> {{stato}} </option>
+                  {% else %}
+                  <option value="{{stato}}"> {{stato}} </option>
+                  {% endif %}
+                  {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label for="selesito">Esito finale</label>
+              <select class="form-control" id="selesito" name="esito_finale" onchange="this.form.submit()">
+                  <option value=""> All </option>
+                  {% for i in esito %}
+                  {% if i == request.esito_finale %}
+                  <option value="{{i}}" selected> {{i}} </option>
+                  {% else %}
+                  <option value="{{i}}"> {{i}} </option>
+                  {% endif %}
+                  {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>  <!-- END row -->
+
+        <div class="row">
+          <div class="col-sm-3 col-sm-offset-3">
+            <div class="form-group">
+              <label for="selclasse">Anno scolastico</label>
+              <select class="form-control" id="selclasse" name="anno_sigla" onchange="this.form.submit()">
+                <option value=""> All </option>
+                {% for i in anno_sigla %}
+                  {{ i }}
+                {% if i == request.anno_sigla %}
+                <option value="{{i}}" selected> {{i}} </option>
+                {% else %}
+                <option value="{{i}}"> {{i}} </option>
+                {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </form>
+
+    </div>  <!-- END well -->
+    </div>  <!-- END col-*-12 -->
+
+    <div class="col-sm-12">
+      <div class="row">
+        <div class="col-sm-12">
+          <a class="btn btn-warning" href="{{ url_for('nation') }}" role="button">Reset form</a>
+        </div>
+      </div>
+    </div>
+
+     {# <div class="col-sm-8">
+     	<button class="btn btn-primary" type="button">
+ 			  iscritti &nbsp;&nbsp;<span class="badge">{{ punti_nr }}</span>
+ 			</button>
+     	<span class="pull-right">Anno Accademico <strong> {{ param }} </strong> 
+     	(distanza media dalla scuola: {{ dist_media[0][0]|round }} metri)</span>
+    </div> #}
+  </div>
+
+  {# GRAFICO plotly #}
+  {# <div class="row">
+    <div class="col-sm-12 map_container">
+      <div id='chart' class='chart'”></div>
+    </div>
+  </div> #}
+
+  <div class="row">
+    <div class="col-sm-12 map_container">
+      <div id='chart' class='chart'”></div>
+    </div>
+  </div>
+
+  <div class="row">
+  	<div class="col-sm-12 map_container">
+  		<div id="map">
+  			{{ folium_map._repr_html_()|safe }}
+        {# {{ qry }} #}
+  		</div>
+  	</div>
+  </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+  <script type='text/javascript'>
+    var graphs = {{graphJSON | safe}};
+    Plotly.plot('chart',graphs,{});
+  </script>
+{% endblock %}

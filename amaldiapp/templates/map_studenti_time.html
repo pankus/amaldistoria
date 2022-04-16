@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+
+{% block app_content %}
+
+  <div class="row">
+  	<div class="col-sm-12 map_container">
+  		<div id="map">
+  			{{ folium_map._repr_html_()|safe }}
+  		</div>
+  	</div>
+  </div>
+
+{% endblock %}
