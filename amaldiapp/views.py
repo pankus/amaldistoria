@@ -29,6 +29,8 @@ def obj2sql(v):
 @app.route('/index')
 def index():
     dati = {'user': 'Studente', 'titolo': 'sito web'}
+    print(os.environ.get('SECRET_KEY'))
+    print(os.getenv('SECRET_KEY'))
     return render_template('index.html', dati=dati)
 
 
@@ -402,8 +404,8 @@ def mapdata_time():
 
     folium.LayerControl().add_to(folium_map)
 
-    # return render_template('map_studenti_time.html', folium_map=folium_map)
-    return folium_map._repr_html_()
+    return render_template('map_studenti_time.html', folium_map=folium_map)
+    # return folium_map._repr_html_()
 
 
 @app.route('/map-nation', methods=['GET', 'POST'])

@@ -1,4 +1,5 @@
 venv
+.env
 .flaskenv
 _amaldi.conf
 *.pyc
