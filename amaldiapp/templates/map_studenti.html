@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+
+{% block app_content %}
+  <div class="row">
+
+    <div class="col-sm-4">
+      <form method="post">
+        <div class="form-group">
+          <select class="form-control" id="selanno" name="anno" onchange="this.form.submit()">
+          	{% for param in params|reverse %}
+          	  {% if param == request.anno %}
+          	  <option value="{{param}}" selected> {{param}} </option>
+          	  {% else %}
+          	  <option value="{{param}}"> {{param}} </option>
+          	  {% endif %}
+          	{% endfor %}
+          </select>
+        </div>
+      </form>
+    </div>
+
+     <div class="col-sm-8">
+     	<button class="btn btn-primary" type="button">
+ 			  iscritti &nbsp;&nbsp;<span class="badge">{{ punti_nr }}</span>
+ 			</button>
+     	<span class="pull-right">Anno Accademico <strong> {{ param }} </strong> 
+     	(distanza media dalla scuola: {{ dist_media[0][0]|round }} metri)</span>
+    </div>
+  </div>
+
+  <div class="row">
+  	<div class="col-sm-12 map_container">
+  		<div id="map">
+  			{{ folium_map._repr_html_()|safe }}
+  		</div>
+  	</div>
+  </div>
+
+{% endblock %}

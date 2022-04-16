@@ -1,0 +1,550 @@
+{% extends "base.html" %}
+
+
+{% block app_content %}
+
+
+<div class="row">
+  
+  <div class="col-sm-12">
+
+    <figure class="highcharts-figure">
+      <div id="chart_indirizzo"></div>
+      <p class="highcharts-description">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur
+      </p>
+    </figure>
+
+    <hr>
+
+    <figure class="highcharts-figure">
+      <div id="chart_indirizzo2"></div>
+      <div id="chart_indirizzo3"></div>
+      <div id="chart_indirizzo4"></div>
+      <div id="chart_indirizzo5"></div>
+      <p class="highcharts-description">
+        {# Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur #}
+      </p>
+    </figure>
+
+  </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+{# <script src="{{ url_for('static', filename='js/highcharts.js') }}"></script> #}
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<script type='text/javascript'>
+$(document).ready(function(){
+
+  let chart1 = Highcharts.chart('chart_indirizzo', {
+
+    chart: {
+      type: 'column'
+    },
+
+    title: {
+      text: 'Indirizzo di studio (diviso per genere)'
+    },
+
+    subtitle: {
+      text: 'Fonte: Liceo Amaldi'
+    },
+
+    xAxis: {
+      categories: {{ indirizzo_data.anni|list|safe }},
+      labels: {
+        step: 2,
+        rotation: -45,
+      },
+      plotBands: [
+      {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 10, // Start of the plot band
+        to: 15, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Oscar Romero',
+          style: {
+            color: '#606060'
+          }
+        }
+      }, {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 16, // Start of the plot band
+        to: 17, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Ponti',
+          style: {
+            color: '#606060'
+          }
+        }
+      }, {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 22, // Start of the plot band
+        to: 30, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Pietrasecca',
+          style: {
+            color: '#606060'
+          }
+        }
+      }
+      ]
+    },
+
+    yAxis: {
+      min: 0,
+      title: {
+          text: 'Numero iscritti'
+      },
+      // opposite: true
+    },
+
+    legend: {
+      reversed: true
+    },
+
+    plotOptions: {
+      series: {
+          stacking: 'normal'
+      }
+      // column: {
+      //     stacking: 'normal'
+      // }
+    },
+
+    series: [{
+      name: 'Linguistico (M)',
+      data: {{ indirizzo_data.linguistico|list|safe }},
+      stack: 'M',
+    }, {
+      name: 'Linguistico (F)',
+      data: {{ indirizzo_data.linguisticof|list|safe }},
+      stack: 'F'
+    }, {
+      name: 'Classico (M)',
+      data: {{ indirizzo_data.classico|list|safe }},
+      stack: 'M'
+    }, {
+      name: 'Classico (F)',
+      data: {{ indirizzo_data.classicof|list|safe }},
+      stack: 'F'
+    }, {
+      name: 'Scientifico (M)',
+      data: {{ indirizzo_data.scientifico|list|safe }},
+      stack: 'M'
+    }, {
+    name: 'Scientifico (F)',
+    data: {{ indirizzo_data.scientificof|list|safe }},
+    stack: 'F'
+    // }, {
+    //   name: 'privatisti (M)',
+    //   data: {{ indirizzo_data.privatisti|list|safe }},
+    //   stack: 'M'
+    // }, {
+    //   name: 'privatisti (F)',
+    //   data: {{ indirizzo_data.privatistif|list|safe }},
+    //   stack: 'F'
+    }]
+  });
+
+
+  let chart2 = Highcharts.chart('chart_indirizzo2', {
+
+    chart: {
+      type: 'column'
+    },
+
+    title: {
+      text: 'Scientifico'
+    },
+
+    xAxis: {
+      categories: {{ indirizzo_data.anni|list|safe }},
+      labels: {
+        step: 2,
+        rotation: -45,
+      },
+      plotBands: [
+      {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 10, // Start of the plot band
+        to: 15, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Oscar Romero',
+          style: {
+            color: '#606060'
+          }
+        }
+      }, {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 16, // Start of the plot band
+        to: 17, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Ponti',
+          style: {
+            color: '#606060'
+          }
+        }
+      }, {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 22, // Start of the plot band
+        to: 30, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Pietrasecca',
+          style: {
+            color: '#606060'
+          }
+        }
+      }
+      ]
+    },
+
+    yAxis: {
+      min: 0,
+      title: {
+          text: 'Numero iscritti'
+      },
+    },
+
+    legend: {
+      reversed: true,
+      align: 'right',
+      verticalAlign: 'top',
+    },
+    
+    tooltip: {
+      shared: true
+    },
+
+    plotOptions: {
+      series: {
+          stacking: 'normal'
+      }
+    },
+
+    series: [{
+      name: 'Scientifico (M)',
+      data: {{ indirizzo_data.scientifico|list|safe }}
+    }, {
+      name: 'Scientifico (F)',
+      data: {{ indirizzo_data.scientificof|list|safe }}
+    }]
+  });
+
+
+  let chart3 = Highcharts.chart('chart_indirizzo3', {
+
+    chart: {
+      type: 'column'
+    },
+
+    title: {
+      text: 'Classico'
+    },
+
+    xAxis: {
+      categories: {{ indirizzo_data.anni|list|safe }},
+      labels: {
+        step: 2,
+        rotation: -45,
+      },
+      plotBands: [
+      {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 10, // Start of the plot band
+        to: 15, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Oscar Romero',
+          style: {
+            color: '#606060'
+          }
+        }
+      }, {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 16, // Start of the plot band
+        to: 17, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Ponti',
+          style: {
+            color: '#606060'
+          }
+        }
+      }, {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 22, // Start of the plot band
+        to: 30, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Pietrasecca',
+          style: {
+            color: '#606060'
+          }
+        }
+      }
+      ]
+    },
+
+    yAxis: {
+      min: 0,
+      title: {
+          text: 'Numero iscritti'
+      },
+      // opposite: true
+    },
+
+    legend: {
+      reversed: true,
+      align: 'right',
+      verticalAlign: 'top',
+    },
+
+    tooltip: {
+      shared: true
+    },
+
+    plotOptions: {
+      series: {
+          stacking: 'normal'
+      }
+    },
+
+    series: [{
+      name: 'Classico (M)',
+      data: {{ indirizzo_data.classico|list|safe }},
+      // stack: 'M'
+    }, {
+      name: 'Classico (F)',
+      data: {{ indirizzo_data.classicof|list|safe }},
+      // stack: 'F'
+    }]
+  });
+
+
+  let chart4 = Highcharts.chart('chart_indirizzo4', {
+
+    chart: {
+      type: 'column'
+    },
+
+    title: {
+      text: 'Linguistico'
+    },
+
+    xAxis: {
+      categories: {{ indirizzo_data.anni|list|safe }},
+      labels: {
+        step: 2,
+        rotation: -45,
+      },
+      plotBands: [
+      {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 10, // Start of the plot band
+        to: 15, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Oscar Romero',
+          style: {
+            color: '#606060'
+          }
+        }
+      }, {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 16, // Start of the plot band
+        to: 17, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Ponti',
+          style: {
+            color: '#606060'
+          }
+        }
+      }, {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 22, // Start of the plot band
+        to: 30, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Pietrasecca',
+          style: {
+            color: '#606060'
+          }
+        }
+      }
+      ]
+    },
+
+    yAxis: {
+      min: 0,
+      title: {
+          text: 'Numero iscritti'
+      },
+    },
+
+    legend: {
+      reversed: true,
+      align: 'right',
+      verticalAlign: 'top',
+    },
+
+    tooltip: {
+      shared: true
+    },
+
+    plotOptions: {
+      series: {
+          stacking: 'normal'
+      }
+    },
+
+    series: [{
+      name: 'Linguistico (M)',
+      data: {{ indirizzo_data.linguistico|list|safe }}
+    }, {
+      name: 'Linguistico (F)',
+      data: {{ indirizzo_data.linguisticof|list|safe }}
+    }]
+  });
+
+  let chart5 = Highcharts.chart('chart_indirizzo5', {
+
+    chart: {
+      type: 'column'
+    },
+
+    title: {
+      text: 'Privatisti (indirizzo misto)'
+    },
+
+    xAxis: {
+      categories: {{ indirizzo_data.anni|list|safe }},
+      labels: {
+        step: 2,
+        rotation: -45,
+      },
+      plotBands: [
+      {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 10, // Start of the plot band
+        to: 15, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Oscar Romero',
+          style: {
+            color: '#606060'
+          }
+        }
+      }, {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 16, // Start of the plot band
+        to: 17, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Ponti',
+          style: {
+            color: '#606060'
+          }
+        }
+      }, {
+        color: 'rgba(68, 170, 213, 0.1)', // Color value
+        from: 22, // Start of the plot band
+        to: 30, // End of the plot band
+        label: {
+          text: 'Succursale</br>Via Pietrasecca',
+          style: {
+            color: '#606060'
+          }
+        }
+      }
+      ]
+    },
+
+    yAxis: {
+      min: 0,
+      title: {
+          text: 'Numero iscritti'
+      },
+    },
+
+    legend: {
+      reversed: true,
+      align: 'right',
+      verticalAlign: 'top',
+    },
+
+    tooltip: {
+      shared: true
+    },
+
+    plotOptions: {
+      series: {
+          stacking: 'normal'
+      }
+    },
+
+    series: [{
+      name: 'Privatisti (M)',
+      data: {{ indirizzo_data.privatisti|list|safe }}
+    }, {
+      name: 'Privatisti (F)',
+      data: {{ indirizzo_data.privatistif|list|safe }}
+    }]
+  });
+
+});
+</script>
+{% endblock %}
+
+
+{% block styles %}
+{{ super() }}
+  <style type="text/css">
+    .highcharts-figure,
+    .highcharts-data-table table {
+        min-width: 360px;
+        max-width: 800px;
+        margin: 1em auto;
+    }
+
+    .highcharts-data-table table {
+        font-family: Verdana, sans-serif;
+        border-collapse: collapse;
+        border: 1px solid #ebebeb;
+        margin: 10px auto;
+        text-align: center;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .highcharts-data-table caption {
+        padding: 1em 0;
+        font-size: 1.2em;
+        color: #555;
+    }
+
+    .highcharts-data-table th {
+        font-weight: 600;
+        padding: 0.5em;
+    }
+
+    .highcharts-data-table td,
+    .highcharts-data-table th,
+    .highcharts-data-table caption {
+        padding: 0.5em;
+    }
+
+    .highcharts-data-table thead tr,
+    .highcharts-data-table tr:nth-child(even) {
+        background: #f8f8f8;
+    }
+
+    .highcharts-data-table tr:hover {
+        background: #f1f7ff;
+    }
+  </style>
+{% endblock %}

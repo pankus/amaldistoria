@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}AmaldiStoria - Register{% endblock %}
+
+{% block app_content %}
+  <div class="row">
+    {# <div class="col-sm-8"> #}
+      {# <div class="login-box-body">
+          <h1>Login</h1>
+      </div> #}
+      <div class="login-box">
+        <div class="login-box-body">
+          <p class="login-box-msg">Register a new membership</p>
+            {{ wtf.quick_form(form) }}
+        </div>
+      </div>
+    {# </div> #}
+</div>
+{% endblock %}

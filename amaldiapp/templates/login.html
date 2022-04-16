@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}AmaldiStoria - Login{% endblock %}
+
+{% block app_content %}
+    <div class="row">
+        {# <div class="col-sm-8"> #}
+            {# <div class="login-box-body">
+                    <h1>Login</h1>
+            </div> #}
+            <div class="login-box">
+            <div class="login-box-body">
+                <p class="login-box-msg">Sign in to start your session</p>
+                    {{ wtf.quick_form(form) }}
+                    <br>
+                    {# <p>Forgot your password? <a href=" {{ url_for('password_reset_request') }}">Click here to reset it</a>.</p> #}
+                    {# <p>New user? <a href="{{ url_for('register') }}">Click here to register</a>.</p> #}
+            </div>
+            </div>
+        {# </div> #}
+</div>
+{% endblock %}

@@ -9,7 +9,7 @@ o
 virtualenv -p python3 venv
 ```
 
-Entrambe le soluzioni fanno la stessa cosa, ovvero creano una cartella `venv` in cui verrà installato una persione di Python (Python 3)
+Entrambe le soluzioni fanno la stessa cosa, ovvero creano una cartella `venv` in cui verrà installato una versione di Python (in questo caso diciamo esplicitamente di installare Python 3)
 
 Per attivare questo ambiente di sviluppo sarà sufficiente ricorrere al seguente comando
 
@@ -24,7 +24,10 @@ Il modo più comodo per installare i pacchetti è `pip`. Per installare Flask us
 pip install flask
 ```
 
-
+Per comodità ogni progetto Python dovrebbe avere un file di testo chiamato `requirements.txt` con la lista di tutte le componenti necessarie a far eseguire l'applicazione. Quindi piuttosto che installare le singole componenti individualmente sarà sufficiente digitare il seguente comando
+```python
+pip install -r requirements.txt
+```
 
 ### 3) Operativi!
 Sebbene un'applicazione Flask possa essere costituita da un unico file, il più delle volte conviene isolare le singole componenti dell'applicazione.
