@@ -67,6 +67,8 @@ class Alunno(db.Model):
     attivita_alternativa = db.Column(db.String(128))
     educazione_fisica = db.Column(db.String(128))
     esito_finale = db.Column(db.String(128))
+    # modifica esito_finale
+    esito_finale_norm = db.Column(db.String(128))
     esito_sospeso = db.Column(db.String(128))
     media_voti = db.Column(db.Float)
     scuola_trasferimento = db.Column(db.String(128))
@@ -75,9 +77,13 @@ class Alunno(db.Model):
     sezione = db.Column(db.String(128))
     classe = db.Column(db.String(128))
     indirizzo_studi = db.Column(db.String(128))
+    # modifica indirizzo_studi
+    indirizzo_studi_norm = db.Column(db.String(128))
     classificazione_ministeriale = db.Column(db.String(128))
     indirizzo_ministeriale = db.Column(db.String(128))
     sede = db.Column(db.String(128))
+    # modifica sede (CENTRALE/SUCCURSALE)
+    sede_norm = db.Column(db.String(128))
     scuola = db.Column(db.String(128))
     cod_meccanografico = db.Column(db.String(128))
     piano_studio = db.Column(db.String(128))

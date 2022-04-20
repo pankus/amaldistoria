@@ -21,9 +21,17 @@
       <div id="chart_indirizzo2"></div>
       <div id="chart_indirizzo3"></div>
       <div id="chart_indirizzo4"></div>
-      <div id="chart_indirizzo5"></div>
       <p class="highcharts-description">
         {# Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur #}
+      </p>
+    </figure>
+
+    <hr>
+
+    <figure class="highcharts-figure">
+      <div id="chart_5"></div>
+      <p class="highcharts-description">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur
       </p>
     </figure>
 
@@ -54,7 +62,7 @@ $(document).ready(function(){
     },
 
     title: {
-      text: 'Indirizzo di studio (diviso per genere)'
+      text: 'Rapporto su abbandono scolastico e trasferimenti'
     },
 
     subtitle: {
@@ -62,7 +70,7 @@ $(document).ready(function(){
     },
 
     xAxis: {
-      categories: {{ indirizzo_data.anni|list|safe }},
+      categories: {{ stato_data.anni|list|safe }},
       labels: {
         step: 2,
         rotation: -45,
@@ -73,7 +81,7 @@ $(document).ready(function(){
     yAxis: {
       min: 0,
       title: {
-          text: 'Numero iscritti'
+          text: 'Numero di iscritti'
       },
       // opposite: true
     },
@@ -90,32 +98,20 @@ $(document).ready(function(){
       series: {
           stacking: 'normal'
       }
+      // column: {
+      //     stacking: 'normal'
+      // }
     },
 
     series: [{
-      name: 'Linguistico (M)',
-      data: {{ indirizzo_data.linguistico|list|safe }},
-      stack: 'M',
+      name: 'Frequenza',
+      data: {{ stato_data.frequenta|list|safe }},
     }, {
-      name: 'Linguistico (F)',
-      data: {{ indirizzo_data.linguisticof|list|safe }},
-      stack: 'F'
+      name: 'Abbandono',
+      data: {{ stato_data.abbandona|list|safe }},
     }, {
-      name: 'Classico (M)',
-      data: {{ indirizzo_data.classico|list|safe }},
-      stack: 'M'
-    }, {
-      name: 'Classico (F)',
-      data: {{ indirizzo_data.classicof|list|safe }},
-      stack: 'F'
-    }, {
-      name: 'Scientifico (M)',
-      data: {{ indirizzo_data.scientifico|list|safe }},
-      stack: 'M'
-    }, {
-      name: 'Scientifico (F)',
-      data: {{ indirizzo_data.scientificof|list|safe }},
-      stack: 'F'
+      name: 'Trasferimento',
+      data: {{ stato_data.trasferito|list|safe }},
     }]
   });
 
@@ -131,7 +127,7 @@ $(document).ready(function(){
     },
 
     xAxis: {
-      categories: {{ indirizzo_data.anni|list|safe }},
+      categories: {{ stato_indirizzo_data.anni|list|safe }},
       labels: {
         step: 2,
         rotation: -45,
@@ -163,11 +159,14 @@ $(document).ready(function(){
     },
 
     series: [{
-      name: 'Scientifico (M)',
-      data: {{ indirizzo_data.scientifico|list|safe }}
+      name: 'Frequenza',
+      data: {{ stato_indirizzo_data.frequenta_scie|list|safe }}
     }, {
-      name: 'Scientifico (F)',
-      data: {{ indirizzo_data.scientificof|list|safe }}
+      name: 'Abbandono',
+      data: {{ stato_indirizzo_data.abbandona_scie|list|safe }}      
+    }, {
+      name: 'Trasferimento',
+      data: {{ stato_indirizzo_data.trasferito_scie|list|safe }}
     }]
   });
 
@@ -183,7 +182,7 @@ $(document).ready(function(){
     },
 
     xAxis: {
-      categories: {{ indirizzo_data.anni|list|safe }},
+      categories: {{ stato_indirizzo_data.anni|list|safe }},
       labels: {
         step: 2,
         rotation: -45,
@@ -216,13 +215,14 @@ $(document).ready(function(){
     },
 
     series: [{
-      name: 'Classico (M)',
-      data: {{ indirizzo_data.classico|list|safe }},
-      // stack: 'M'
+      name: 'Frequenza',
+      data: {{ stato_indirizzo_data.frequenta_clas|list|safe }}
     }, {
-      name: 'Classico (F)',
-      data: {{ indirizzo_data.classicof|list|safe }},
-      // stack: 'F'
+      name: 'Abbandono',
+      data: {{ stato_indirizzo_data.abbandona_clas|list|safe }}      
+    }, {
+      name: 'Trasferimento',
+      data: {{ stato_indirizzo_data.trasferito_clas|list|safe }}
     }]
   });
 
@@ -238,7 +238,7 @@ $(document).ready(function(){
     },
 
     xAxis: {
-      categories: {{ indirizzo_data.anni|list|safe }},
+      categories: {{ stato_indirizzo_data.anni|list|safe }},
       labels: {
         step: 2,
         rotation: -45,
@@ -270,31 +270,34 @@ $(document).ready(function(){
     },
 
     series: [{
-      name: 'Linguistico (M)',
-      data: {{ indirizzo_data.linguistico|list|safe }}
+      name: 'Frequenza',
+      data: {{ stato_indirizzo_data.frequenta_ling|list|safe }}
     }, {
-      name: 'Linguistico (F)',
-      data: {{ indirizzo_data.linguisticof|list|safe }}
+      name: 'Abbandono',
+      data: {{ stato_indirizzo_data.abbandona_ling|list|safe }}      
+    }, {
+      name: 'Trasferimento',
+      data: {{ stato_indirizzo_data.trasferito_ling|list|safe }}
     }]
   });
 
-  let chart5 = Highcharts.chart('chart_indirizzo5', {
+
+  let chart5 = Highcharts.chart('chart_5', {
 
     chart: {
       type: 'column'
     },
 
     title: {
-      text: 'Privatisti (indirizzo misto)'
+      text: 'Abbandono e trasferimenti (per nazionalità)'
     },
 
     xAxis: {
-      categories: {{ indirizzo_data.anni|list|safe }},
+      categories: {{ stato_nation.anni|list|safe }},
       labels: {
         step: 2,
         rotation: -45,
-      },
-      plotBands: [{{plotbands|safe}}]
+      }
     },
 
     yAxis: {
@@ -305,7 +308,7 @@ $(document).ready(function(){
     },
 
     legend: {
-      reversed: true,
+      // reversed: true,
       align: 'right',
       verticalAlign: 'top',
     },
@@ -316,18 +319,39 @@ $(document).ready(function(){
 
     plotOptions: {
       series: {
-          stacking: 'normal'
+          stacking: 'percent'
       }
     },
 
     series: [{
-      name: 'Privatisti (M)',
-      data: {{ indirizzo_data.privatisti|list|safe }}
+      name: 'Ita',
+      data: {{ stato_nation.ita|list|safe }},
+      stack: 'nation'
     }, {
-      name: 'Privatisti (F)',
-      data: {{ indirizzo_data.privatistif|list|safe }}
+      name: 'Str',
+      data: {{ stato_nation.noita|list|safe }},
+      stack: 'nation'
+    }, {
+      name: 'Abbandono (ita)',
+      data: {{ stato_nation.abb_ita|list|safe }},
+      stack: 'abbandono'
+    }, {
+      name: 'Abbandono (str)',
+      data: {{ stato_nation.abb_no_ita|list|safe }},
+      stack: 'abbandono'
+    }, {
+      name: 'Trasferimento (ita)',
+      data: {{ stato_nation.tra_ita|list|safe }},
+      stack: 'trasferimento',
+      visible: false
+    }, {
+      name: 'Trasferimento (str)',
+      data: {{ stato_nation.tra_no_ita|list|safe }},
+      stack: 'trasferimento',
+      visible: false
     }]
   });
+
 
 });
 </script>

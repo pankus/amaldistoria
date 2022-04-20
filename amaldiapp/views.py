@@ -29,8 +29,8 @@ def obj2sql(v):
 @app.route('/index')
 def index():
     dati = {'user': 'Studente', 'titolo': 'sito web'}
-    print(os.environ.get('SECRET_KEY'))
-    print(os.getenv('SECRET_KEY'))
+    # print(os.environ.get('SECRET_KEY'))
+    # print(os.getenv('SECRET_KEY'))
     return render_template('index.html', dati=dati)
 
 
@@ -408,8 +408,8 @@ def mapdata_time():
     # return folium_map._repr_html_()
 
 
-@app.route('/map-nation', methods=['GET', 'POST'])
-def nation():
+@app.route('/map-graph', methods=['GET', 'POST'])
+def map_graph():
 
     params = ["2021-2022", "2020-2021", "2019-2020", "2018-2019", "2017-2018", "2016-2017", "2015-2016",
               "2014-2015", "2013-2014", "2012-2013", "2011-2012", "2010-2011", "2009-2010", "2008-2009",
@@ -425,7 +425,7 @@ def nation():
     param = '1992-1993'
 
     fil_anno, fil_nation, fil_stato, fil_esito = '', '', '', ''
-    fil_anno_sigla = ''
+    fil_anno_sigla, fil_indirizzo = '', ''
 
     if request.form.get('anno'):
         fil_anno = [Alunno.anno_ref == request.form.get('anno', '')]
@@ -438,10 +438,13 @@ def nation():
         fil_stato = [Alunno.stato_alunno == request.form.get('stato_alunno', '')]
 
     if request.form.get('esito_finale'):
-        fil_stato = [Alunno.esito_finale == request.form.get('esito_finale', '')]
+        fil_stato = [Alunno.esito_finale_norm == request.form.get('esito_finale', '')]
 
     if request.form.get('anno_sigla'):
         fil_anno_sigla = [Alunno.anno_sigla == request.form.get('anno_sigla', '')]
+
+    if request.form.get('indirizzo_studio'):
+        fil_indirizzo = [Alunno.indirizzo_studi_norm == request.form.get('indirizzo_studio')]
 
     """ query principale (prima chiamata) """
     qry = Alunno.query.join(Indirizzo).filter(Alunno.anno_ref == param)
@@ -452,7 +455,7 @@ def nation():
         qry = Alunno.query.join(Indirizzo).\
               filter(*fil_anno).filter(*fil_nation).\
               filter(*fil_stato).filter(*fil_esito).\
-              filter(*fil_anno_sigla)
+              filter(*fil_anno_sigla).filter(*fil_indirizzo)
               # filter(Indirizzo.osm_lon.isnot(None)).all()
 
     # DEBUG query
@@ -463,8 +466,9 @@ def nation():
     """ popolamento dei menu select """
     nation = sorted(set( [x.descr_cittadinanza for x in qry if x.descr_cittadinanza] ))
     stato_alunno = sorted(set( [x.stato_alunno for x in qry if x.stato_alunno] ))
-    esito = sorted(set( [x.esito_finale for x in qry if x.esito_finale] ))
+    esito = sorted(set( [x.esito_finale_norm for x in qry if x.esito_finale_norm] ))
     anno_sigla = sorted(set( [str(x.anno_sigla) for x in qry if x.anno_sigla] ))
+    indirizzo = sorted(set( [str(x.indirizzo_studi_norm) for x in qry if x.indirizzo_studi_norm] ))
 
     # nation = db.session.query(func.coalesce(Alunno.descr_cittadinanza, 'N.D.'), func.count(Alunno.descr_cittadinanza)).\
     #          filter(*filters).\
@@ -475,28 +479,14 @@ def nation():
     # print('PARAMETRI: ', param, request, len(qry))
     # print(fil_anno, fil_nation, fil_stato, fil_esito)
 
-    """ GRAFICI > le quantita' dei grafici sono condizioante da alcuni record con valori nulli (a volte sottostimano) """
-    """ grafico Plotly & Pandas"""
-    data_plt = Counter([x.descr_cittadinanza for x in qry])
-    data_df = {'Nazionalità': list(data_plt.keys()), 'Quantità':list(data_plt.values())}
-    df = pd.DataFrame.from_dict(data_df)
-
-    # sort dataframe
-    df = df.sort_values(by=['Nazionalità'], ascending=False)
-
-    height = 300 if len(df.index) < 8 else len(df.index) * 40
-    
-    """ grafico con barre orizontali """
-    # fig = px.bar(df, x='Nazionalità', y='Quantità', text_auto='.2s')
-    fig = px.bar(df, y='Nazionalità', x='Quantità', text_auto='.2s', orientation='h',
-                 height=height)
-    # fig.update_traces(width=0.6)
-    
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
+    """ GRAFICI """
+    """ Highcharts > cittadinanza, genere, indirizzo > grafico a torta """
+    data_cittadinanza = OrderedDict( Counter( [x.descr_cittadinanza for x in qry] ) )
+    data_genere = OrderedDict( Counter( [x.sesso for x in qry] ) )
+    data_indirizzo = OrderedDict( Counter( [x.indirizzo_studi_norm for x in qry] ) )
+    data_cap = OrderedDict( Counter( [x.cap_residenza for x in qry] ) )
 
     """ mappa """
-
     punti = [[x.indirizzo.osm_lat, x.indirizzo.osm_lon, x.indirizzo.osm_road] for x in qry if x.indirizzo.geom]
 
     # sezione per la stampa della mappa (devo dare un'altezza in px altrimenti non si inizializza)
@@ -520,6 +510,12 @@ def nation():
                            contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
                      name='CartoDB DarkMatter', show=True).add_to(folium_map)
     folium.TileLayer(tiles='OpenStreetMap', name='Open Street Map', show=True).add_to(folium_map)
+
+    Fullscreen(position='topleft', # ‘topleft’, default=‘topright’, ‘bottomleft’, ‘bottomright’ 
+               title='Schermo intero', 
+               title_cancel='',
+               force_separate_button=False
+               ).add_to(folium_map)
 
     def add_heatmap(folium_map):
 
@@ -613,17 +609,21 @@ def nation():
     # add control to pick basemap, layers to show
     folium.LayerControl().add_to(folium_map)
 
-    return render_template('map_nation.html',
+    return render_template('map_graph.html',
                            params=params,
                            param=param,
                            request=request.form,
                            nation=nation,
                            esito=esito,
+                           indirizzo=indirizzo,
                            anno_sigla=anno_sigla,
                            qry=qry,
                            stato_alunno=stato_alunno,
-                           graphJSON=graphJSON,
-                           folium_map=folium_map
+                           folium_map=folium_map,
+                           chart_cittadinanza=data_cittadinanza,
+                           chart_genere=data_genere,
+                           chart_indirizzo=data_indirizzo,
+                           chart_cap=data_cap
                            )
 
 
@@ -780,6 +780,25 @@ def serie_generale():
 def serie_indirizzo():
 
     """ indirizzo studi """
+
+    plotbands = r"""
+        {color: 'rgba(68, 170, 213, 0.1)', from: 9, to: 14,
+        label: {text: '<strong>Succursale</strong></br>Via Oscar Romero',
+          style: {color: '#606060'}
+        }
+      }, 
+      {color: 'rgba(68, 170, 213, 0.1)', from: 15, to: 16,
+        label: {text: '<strong>Succursale</strong></br>Via Ponti',
+          style: {color: '#606060'}
+        }
+      },
+      {color: 'rgba(68, 170, 213, 0.1)', from: 21, to: 30,
+        label: {text: '<strong>Succursale</strong></br>Via Pietrasecca',
+          style: {color: '#606060'}
+        }
+      }
+    """
+
     i = text(
             r""" SELECT anno_ref,
                     array_length(array_agg( id_alunno), 1) as tot,
@@ -814,7 +833,119 @@ def serie_indirizzo():
     }
 
     return render_template('serie_indirizzo.html',
+                           plotbands=plotbands,
                            indirizzo_data=indirizzo_data
                           )
 
 
+@app.route('/serie-stato')
+def serie_stato():
+
+    plotbands = r"""
+        {color: 'rgba(68, 170, 213, 0.1)', from: 9, to: 14,
+        label: {text: '<strong>Succursale</strong></br>Via Oscar Romero',
+          style: {color: '#606060'}
+        }
+      }, 
+      {color: 'rgba(68, 170, 213, 0.1)', from: 15, to: 16,
+        label: {text: '<strong>Succursale</strong></br>Via Ponti',
+          style: {color: '#606060'}
+        }
+      },
+      {color: 'rgba(68, 170, 213, 0.1)', from: 21, to: 30,
+        label: {text: '<strong>Succursale</strong></br>Via Pietrasecca',
+          style: {color: '#606060'}
+        }
+      }
+    """
+
+    """ trasferimento / abbandono studenti (stato_alunno) """
+
+    s = text(
+            r"""
+                SELECT anno_ref,
+                    array_length(array_agg( id_alunno), 1) as tot,
+                    -- devo dividere tra bocciati e promossi
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Frequenta' THEN 1 END) , 0 ) AS frequenta,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Abbandona' THEN 1 END) , 0 ) AS abbandona,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Trasferito' THEN 1 END) , 0 ) AS trasferito,
+                    count(stato_alunno),
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Frequenta' and indirizzo_studi ILIKE '%LINGUIS%' THEN 1 END) , 0 ) AS frequenta_ling,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Frequenta' and indirizzo_studi ILIKE '%CLASSIC%' THEN 1 END) , 0 ) AS frequenta_clas,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Frequenta' and indirizzo_studi ILIKE '%SCIENTIF%' THEN 1 END) , 0 ) AS frequenta_scie,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Abbandona' and indirizzo_studi ILIKE '%LINGUIS%' THEN 1 END) , 0 ) AS abbandona_ling,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Abbandona' and indirizzo_studi ILIKE '%CLASSIC%' THEN 1 END) , 0 ) AS abbandona_clas,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Abbandona' and indirizzo_studi ILIKE '%SCIENTIF%' THEN 1 END) , 0 ) AS abbandona_scie,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Trasferito' and indirizzo_studi ILIKE '%LINGUIS%' THEN 1 END) , 0 ) AS trasferito_ling,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Trasferito' and indirizzo_studi ILIKE '%CLASSIC%' THEN 1 END) , 0 ) AS trasferito_clas,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Trasferito' and indirizzo_studi ILIKE '%SCIENTIF%' THEN 1 END) , 0 ) AS trasferito_scie
+                FROM alunni
+                GROUP BY anno_ref
+                ORDER BY anno_ref
+            """)
+
+    conn = db.engine.connect()
+    stato_rows = conn.execute(s).fetchall()
+
+    stato_data = {
+        'anni': [x[0] for x in stato_rows],
+        'iscritti': [x[1] for x in stato_rows],
+        'frequenta': [x[2] if x[2] > 0 else 'null' for x in stato_rows],
+        'abbandona': [x[3] if x[3] > 0 else 'null' for x in stato_rows],
+        'trasferito': [x[4] if x[4] > 0 else 'null' for x in stato_rows]
+    }
+
+    stato_indirizzo_data = {
+        'anni': [x[0] for x in stato_rows],
+        'iscritti': [x[1] for x in stato_rows],
+        'frequenta_ling': [x[6] if x[6] > 0 else 'null' for x in stato_rows],
+        'frequenta_clas': [x[7] if x[7] > 0 else 'null' for x in stato_rows],
+        'frequenta_scie': [x[8] if x[8] > 0 else 'null' for x in stato_rows],
+        'abbandona_ling': [x[9] if x[9] > 0 else 'null' for x in stato_rows],
+        'abbandona_clas': [x[10] if x[10] > 0 else 'null' for x in stato_rows],
+        'abbandona_scie': [x[11] if x[11] > 0 else 'null' for x in stato_rows],
+        'trasferito_ling': [x[12] if x[12] > 0 else 'null' for x in stato_rows],
+        'trasferito_clas': [x[13] if x[13] > 0 else 'null' for x in stato_rows],
+        'trasferito_scie': [x[14] if x[14] > 0 else 'null' for x in stato_rows]
+    }
+
+    n = text(
+            r"""
+                SELECT anno_ref,
+                    array_length(array_agg( id_alunno), 1) as tot,
+                    coalesce( SUM(CASE WHEN descr_cittadinanza = 'ITALIANA' THEN 1 END) , 0 ) AS italiana,
+                    coalesce( SUM(CASE WHEN descr_cittadinanza != 'ITALIANA' THEN 1 END) , 0 ) AS nonitaliana,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Abbandona' and descr_cittadinanza = 'ITALIANA' THEN 1 END) , 0 ) AS abb_ita,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Abbandona' and descr_cittadinanza != 'ITALIANA' THEN 1 END) , 0 ) AS abb_no_ita,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Trasferito' and descr_cittadinanza = 'ITALIANA' THEN 1 END) , 0 ) AS tra_ita,
+                    coalesce( SUM(CASE WHEN stato_alunno = 'Trasferito' and descr_cittadinanza != 'ITALIANA' THEN 1 END) , 0 ) AS tra_no_ita,
+                    count(descr_cittadinanza)
+                FROM alunni
+                -- il fenomeno comincia dal 2001
+                WHERE anno_ref IN ('2001-2002', '2002-2003', '2003-2004', '2004-2005', '2005-2006', '2006-2007', '2007-2008',
+                                   '2008-2009', '2009-2010', '2010-2011', '2011-2012', '2012-2013', '2013-2014', '2014-2015',
+                                   '2015-2016', '2016-2017', '2017-2018', '2018-2019', '2019-2020', '2020-2021', '2021-2022')
+                GROUP BY anno_ref
+                ORDER BY anno_ref
+            """)
+
+    conn = db.engine.connect()
+    stato_rows = conn.execute(n).fetchall()
+
+    stato_nation = {
+        'anni': [x[0] for x in stato_rows],
+        'tot': [x[1] if x[1] > 0 else 'null' for x in stato_rows],
+        'ita': [x[2] if x[2] > 0 else 'null' for x in stato_rows],
+        'noita': [x[3] if x[3] > 0 else 'null' for x in stato_rows],
+        'abb_ita': [x[4] if x[4] > 0 else 'null' for x in stato_rows],
+        'abb_no_ita': [x[5] if x[5] > 0 else 'null' for x in stato_rows],
+        'tra_ita': [x[6] if x[6] > 0 else 'null' for x in stato_rows],
+        'tra_no_ita': [x[7] if x[7] > 0 else 'null' for x in stato_rows]
+    }
+
+
+    return render_template('serie_stato.html', plotbands=plotbands,
+                           stato_data=stato_data,
+                           stato_indirizzo_data=stato_indirizzo_data,
+                           stato_nation=stato_nation
+                          )

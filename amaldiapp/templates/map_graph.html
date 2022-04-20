@@ -1,0 +1,455 @@
+{% extends "base.html" %}
+
+
+{% block app_content %}
+  <div class="row">
+
+    <div class="col-sm-12">
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur
+      </p>
+    </div>
+
+    <div class="col-sm-12">
+
+    <div class="well">
+
+      <form method="post">
+        <div class="row">
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label for="selanno">Anno scolastico</label>
+              <select class="form-control" id="selanno" name="anno" onchange="this.form.submit()">
+              	{# <option value=""> All </option> #}
+                {% for val in params|reverse %}
+              	  {% if val == request.anno or val == param %}
+              	  <option value="{{val}}" selected> {{val}} </option>
+              	  {% else %}
+              	  <option value="{{val}}"> {{val}} </option>
+              	  {% endif %}
+              	{% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label for="selnation">Cittadinanza</label>
+              <select class="form-control" id="selnation" name="nationalita" onchange="this.form.submit()">
+                  <option value=""> All </option>
+                  {% for cittadinanza in nation %}
+                  {% if cittadinanza == request.nationalita %}
+                  <option value="{{cittadinanza}}" selected> {{cittadinanza}} </option>
+                  {% else %}
+                  <option value="{{cittadinanza}}"> {{cittadinanza}} </option>
+                  {% endif %}
+                  {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label for="selstato">Stato alunno</label>
+              <select class="form-control" id="selstato" name="stato_alunno" onchange="this.form.submit()">
+                  <option value=""> All </option>
+                  {% for stato in stato_alunno %}
+                  {% if stato == request.stato_alunno %}
+                  <option value="{{stato}}" selected> {{stato}} </option>
+                  {% else %}
+                  <option value="{{stato}}"> {{stato}} </option>
+                  {% endif %}
+                  {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label for="selesito">Esito finale</label>
+              <select class="form-control" id="selesito" name="esito_finale" onchange="this.form.submit()">
+                  <option value=""> All </option>
+                  {% for i in esito %}
+                  {% if i == request.esito_finale %}
+                  <option value="{{i}}" selected> {{i}} </option>
+                  {% else %}
+                  <option value="{{i}}"> {{i}} </option>
+                  {% endif %}
+                  {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>  <!-- END row -->
+
+        <div class="row">
+          <div class="col-sm-3 col-sm-offset-3">
+            <div class="form-group">
+              <label for="selclasse">Anno scolastico</label>
+              <select class="form-control" id="selclasse" name="anno_sigla" onchange="this.form.submit()">
+                <option value=""> All </option>
+                {% for i in anno_sigla %}
+                  {{ i }}
+                {% if i == request.anno_sigla %}
+                <option value="{{i}}" selected> {{i}} </option>
+                {% else %}
+                <option value="{{i}}"> {{i}} </option>
+                {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-sm-3">
+            <div class="form-group">
+              <label for="selclasse">Indirizzo studi</label>
+              <select class="form-control" id="selindirizzo" name="indirizzo_studio" onchange="this.form.submit()">
+                <option value=""> All </option>
+                {% for i in indirizzo %}
+                  {{ i }}
+                {% if i == request.indirizzo_studio %}
+                <option value="{{i}}" selected> {{i}} </option>
+                {% else %}
+                <option value="{{i}}"> {{i}} </option>
+                {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </form>
+
+    </div>  <!-- END well -->
+    </div>  <!-- END col-*-12 -->
+
+    <div class="col-sm-12">
+      <div class="row">
+        
+        <div class="col-sm-2">
+          <a class="btn btn-warning" href="{{ url_for('map_graph') }}" role="button">Reset form</a>
+        </div>
+
+        {% for key, value in request.items() %}
+          {% if value and key == 'nationalita' %}
+            <div class="col-sm-2">
+              <a href="#">Cittadinanza <span class="badge">{{ value }}</span></a>
+            </div>
+          {% endif %}
+          {% if value and key == 'stato_alunno' %}
+            <div class="col-sm-2">
+              <a href="#">Stato alunno <span class="badge">{{ value }}</span></a>
+            </div>
+          {% endif %}
+          {% if value and key == 'esito_finale' %}
+            <div class="col-sm-2">
+              <a href="#">Esito finale <span class="badge">{{ value }}</span></a>
+            </div>
+          {% endif %}
+          {% if value and key == 'anno_sigla' %}
+            <div class="col-sm-2">
+              <a href="#">Anno di corso <span class="badge">{{ value }}</span></a>
+            </div>
+          {% endif %}
+          {% if value and key == 'indirizzo_studio' %}
+            <div class="col-sm-2">
+              <a href="#">Indirizzo di studi <span class="badge">{{ value }}</span></a>
+            </div>
+          {% endif %}
+        {% endfor %}
+      
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row">
+
+    <div class="col-sm-6">
+      <figure class="highcharts-figure">
+        <div id="chart_indirizzo_pie"></div>
+        <p class="highcharts-description">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco.
+        </p>
+      </figure>
+    </div>
+
+    <div class="col-sm-6">
+      <figure class="highcharts-figure">
+        <div id="chart_genere_pie"></div>
+        <p class="highcharts-description">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco.
+        </p>
+      </figure>
+    </div>
+
+    <div class="col-sm-6">
+      <figure class="highcharts-figure">
+        <div id="chart_cittadinanza_pie"></div>
+        <p class="highcharts-description">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco.
+        </p>
+      </figure>
+      <button class="btn btn-default btn-sm" id="toggle">Dettaglio cittadinanza</button>
+    </div>
+
+    <div class="col-sm-6">
+      <figure class="highcharts-figure">
+        <div id="chart_cap_pie"></div>
+        <p class="highcharts-description">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco.
+        </p>
+      </figure>
+    </div>
+
+  </div>
+
+  <hr>
+
+  <div class="row">
+  	<div class="col-sm-12 map_container">
+  		<div id="map">
+  			{{ folium_map._repr_html_()|safe }}
+  		</div>
+  	</div>
+  </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/export-data.js"></script>
+  <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+  <script type='text/javascript'>
+  $(document).ready(function(){
+
+    let chart1 = Highcharts.chart('chart_cittadinanza_pie', {
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false,
+            type: 'pie',
+            style: { fontFamily: 'Helvetica Neue', fontSize: '10px' }
+        },
+        title: {
+            text: 'Cittadinanza'
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        accessibility: {
+            point: {
+                valueSuffix: '%'
+            }
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                },
+                // showInLegend: true
+            }
+        },
+        credits: { enabled: false },
+        series: [{
+          name: 'Campione',
+          colorByPoint: true,
+          data: [
+          {# {% for i, j in chart_cittadinanza.items() %} #}
+          {% for i in chart_cittadinanza.items() %}
+            {% if loop.index <= 1 %}
+            { 
+              name: '{{ i[0]|capitalize|safe }}',
+              y: {{ i[1] }},
+              sliced: true,
+              selected: true,
+
+            },
+            {% else %}
+            { 
+              name: '{{ i[0]|capitalize|safe }}',
+              y: {{ i[1] }}
+            },
+            {% endif %}
+          {% endfor %}
+          ]
+        }]
+    });
+
+    document.getElementById('toggle').addEventListener('click', () => {
+      chart1.series[0].data[0].setVisible(!chart1.series[0].data[0].visible);
+    })
+
+
+    let chart2 = Highcharts.chart('chart_indirizzo_pie', {
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false,
+            type: 'pie'
+        },
+        title: {
+            text: 'Indirizzo di studi'
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        accessibility: {
+            point: {
+                valueSuffix: '%'
+            }
+        },
+        plotOptions: {
+            pie: {
+              // size:'100%',
+              allowPointSelect: true,
+              cursor: 'pointer',
+              dataLabels: {
+                  enabled: true,
+                  format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+              },
+              //showInLegend: true
+            }
+        },
+        credits: { enabled: false },
+        series: [{
+          name: 'Campione',
+          colorByPoint: true,
+          data: [
+          {% for i in chart_indirizzo.items() %}
+            {% if loop.index <= 1 %}
+            { 
+              name: '{{ i[0]|capitalize|safe }}',
+              y: {{ i[1] }},
+              sliced: true,
+              selected: true,
+
+            },
+            {% else %}
+            { 
+              name: '{{ i[0]|capitalize|safe }}',
+              y: {{ i[1] }}
+            },
+            {% endif %}
+          {% endfor %}
+          ]
+        }]
+    });
+
+
+    let chart3 = Highcharts.chart('chart_genere_pie', {
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false,
+            type: 'pie'
+        },
+        title: {
+            text: 'Genere'
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        accessibility: {
+            point: {
+                valueSuffix: '%'
+            }
+        },
+        plotOptions: {
+          pie: {
+            size:'80%',
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+            },
+            //showInLegend: true
+          }
+        },
+        credits: { enabled: false },
+        series: [{
+          name: 'Campione',
+          colorByPoint: true,
+          data: [
+          {% for i in chart_genere.items() %}
+            {% if loop.index <= 1 %}
+            { 
+              name: '{{ i[0]|capitalize|safe }}',
+              y: {{ i[1] }},
+              sliced: true,
+              selected: true,
+
+            },
+            {% else %}
+            { 
+              name: '{{ i[0]|capitalize|safe }}',
+              y: {{ i[1] }}
+            },
+            {% endif %}
+          {% endfor %}
+          ]
+        }]
+    });
+
+
+    let chart4 = Highcharts.chart('chart_cap_pie', {
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false,
+            type: 'pie'
+        },
+        title: {
+            text: 'CAP di residenza'
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        accessibility: {
+            point: {
+                valueSuffix: '%'
+            }
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                },
+                //showInLegend: true
+            }
+        },
+        credits: { enabled: false },
+        series: [{
+          name: 'Campione',
+          colorByPoint: true,
+          data: [
+          {% for i in chart_cap.items() %}
+            {% if loop.index <= 1 %}
+            { 
+              name: '{{ i[0]|capitalize|safe }}',
+              y: {{ i[1] }},
+              sliced: true,
+              selected: true,
+
+            },
+            {% else %}
+            { 
+              name: '{{ i[0]|capitalize|safe }}',
+              y: {{ i[1] }}
+            },
+            {% endif %}
+          {% endfor %}
+          ]
+        }]
+    });
+
+
+  });
+  </script>
+{% endblock %}
