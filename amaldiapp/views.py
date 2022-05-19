@@ -2,14 +2,20 @@ from flask import render_template, Markup, request, jsonify, json, flash, redire
 from flask_login import login_required, login_user, logout_user, current_user
 from amaldiapp import app, db
 from sqlalchemy.sql import text, func, and_
+from sqlalchemy.orm import joinedload
 import os
 import folium
 from folium.plugins import MarkerCluster, HeatMap, HeatMapWithTime, Fullscreen, Geocoder
 import pandas as pd
-import plotly
-import plotly.express as px
+# import plotly
+# import plotly.express as px
 import geojson
 from collections import OrderedDict, Counter
+
+import flask_admin as admin
+from flask_admin import expose, AdminIndexView
+from flask_admin.menu import MenuLink
+from flask_admin.contrib.sqla import ModelView
 
 from amaldiapp.models import User, Indirizzo, Alunno
 from amaldiapp.forms import LoginForm, RegistrationForm
@@ -23,6 +29,52 @@ def obj2sql(v):
         compile_kwargs={"literal_binds": True})
     )
     return sql
+
+""" Admmin Panel """
+class HomeView(AdminIndexView):
+    @expose('/')
+    def admin_index(self):
+        return self.render(url_for(index))
+
+class customAlunno(ModelView):
+    """ gestion dati alunni """
+    
+    action_disallowed_list = ['delete', ]
+    can_delete = False
+    
+    column_sortable_list = ('id','id_alunno', 'anno_ref', 'luogo_nascita', 'sesso', 'anno_sigla', 'sezione',
+                            'indirizzo_studi_norm', 'esito_finale_norm')
+    column_list = ['id', 'id_alunno', 'anno_ref', 'luogo_nascita', 'sesso', 'anno_sigla', 'sezione',
+                   'indirizzo_studi_norm', 'esito_finale_norm']
+    column_default_sort = 'id'
+    
+    column_searchable_list = ['anno_ref', 'luogo_nascita']
+    column_filters = ['id_alunno', 'anno_ref', 'luogo_nascita', 'sesso', 'anno_sigla', 'sezione',
+                      'indirizzo_studi_norm', 'esito_finale_norm']
+    
+class customIndirizzo(ModelView):
+    action_disallowed_list = ['delete', ]
+    can_delete = False
+    
+    column_sortable_list = ('osm_road', 'osm_house_number', 'osm_house_number_dev', 'osm_postcode',
+                            'osm_suburb', 'osm_city', 'osm_lat', 'osm_lon')
+    column_list = ['osm_road', 'osm_house_number', 'osm_house_number_dev', 'osm_postcode',
+                            'osm_suburb', 'osm_city', 'osm_lat', 'osm_lon']
+    # column_default_sort = 'osm_city'
+    
+    column_searchable_list = ['osm_road', 'osm_suburb']
+    column_filters = ['osm_road', 'osm_house_number', 'osm_house_number_dev', 'osm_postcode',
+                      'osm_suburb', 'osm_city', 'osm_lat', 'osm_lon']
+
+# app.config['FLASK_ADMIN_SWATCH'] = 'spacelab'
+# app.config['FLASK_ADMIN_SWATCH'] = 'united'
+admin = admin.Admin(app, name='AmaldiStoria [Admin Panel]', template_mode='bootstrap3')
+
+# se non metto la category elimino il sub-menu
+admin.add_view(customAlunno(Alunno, db.session, category=''))
+admin.add_view(customIndirizzo(Indirizzo, db.session, category=''))
+# admin.add_view(ModelView(Indirizzo, db.session))
+admin.add_link(MenuLink(name='AmaldiStoria Homepage', url='/'))
 
 
 @app.route('/')
@@ -72,6 +124,21 @@ def register():
         flash(u'You can now login.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
+
+
+@app.route('/presentazione')
+def presentazione():
+    return  render_template('presentazione.html')
+
+
+@app.route('/immagini')
+def immagini():
+    return  render_template('immagini.html')
+
+
+@app.route('/voci')
+def voci():
+    return  render_template('voci.html')
 
 
 @app.route('/mapdata', methods=['GET', 'POST'])
@@ -158,7 +225,7 @@ def mapdata():
     folium_map = folium.Map(location=start_coords,
                             zoom_start=start_zoom,
                             width='100%',
-                            height=600,
+                            height=500,
                             tiles=None,
                             control_scale=True)
     
@@ -316,7 +383,7 @@ def mapdata_time():
                  SELECT anno_ref, array_agg( array[ osm_lat, osm_lon ] ), array_length( array_agg( (osm_lat, osm_lon) ), 1 )
                  FROM indirizzo i
                  JOIN alunni a ON a.id_alunno = i.id_alunno
-                 WHERE geom is not null
+                 WHERE geom is not null                 
                  -- GROUP BY regexp_replace(anno_ref, '-\d{4}$', '')
                  GROUP BY anno_ref
                  ORDER BY 1
@@ -346,8 +413,8 @@ def mapdata_time():
     folium_map = folium.Map(location=start_coords,
                             zoom_start=start_zoom,
                             width='100%',
-                            # height=600,
-                            height='100%',
+                            height=550,
+                            # height='100%',
                             tiles=None,
                             control_scale=True)
     
@@ -447,15 +514,23 @@ def map_graph():
         fil_indirizzo = [Alunno.indirizzo_studi_norm == request.form.get('indirizzo_studio')]
 
     """ query principale (prima chiamata) """
-    qry = Alunno.query.join(Indirizzo).filter(Alunno.anno_ref == param)
+    qry = db.session.query(Alunno).\
+          options(joinedload(Alunno.indirizzo)).\
+          join(Indirizzo).filter(Alunno.anno_ref == param)
           # filter(Indirizzo.osm_lon.isnot(None)).all()
 
     """ la query cambia ad ogni chiamata POST """
     if request.method == 'POST':
-        qry = Alunno.query.join(Indirizzo).\
+        qry = db.session.query(Alunno).\
+              options(joinedload(Alunno.indirizzo)).\
+              join(Indirizzo).\
               filter(*fil_anno).filter(*fil_nation).\
               filter(*fil_stato).filter(*fil_esito).\
               filter(*fil_anno_sigla).filter(*fil_indirizzo)
+        # qry = Alunno.query.join(Indirizzo).\
+        #       filter(*fil_anno).filter(*fil_nation).\
+        #       filter(*fil_stato).filter(*fil_esito).\
+        #       filter(*fil_anno_sigla).filter(*fil_indirizzo)
               # filter(Indirizzo.osm_lon.isnot(None)).all()
 
     # DEBUG query
@@ -469,6 +544,11 @@ def map_graph():
     esito = sorted(set( [x.esito_finale_norm for x in qry if x.esito_finale_norm] ))
     anno_sigla = sorted(set( [str(x.anno_sigla) for x in qry if x.anno_sigla] ))
     indirizzo = sorted(set( [str(x.indirizzo_studi_norm) for x in qry if x.indirizzo_studi_norm] ))
+    
+    iscritti = db.session.query(Alunno).filter(Alunno.anno_ref == param).count()
+    if request.form.get('anno'):
+        iscritti = db.session.query(Alunno).filter(*fil_anno).count()
+    print(iscritti)
 
     # nation = db.session.query(func.coalesce(Alunno.descr_cittadinanza, 'N.D.'), func.count(Alunno.descr_cittadinanza)).\
     #          filter(*filters).\
@@ -481,7 +561,10 @@ def map_graph():
 
     """ GRAFICI """
     """ Highcharts > cittadinanza, genere, indirizzo > grafico a torta """
-    data_cittadinanza = OrderedDict( Counter( [x.descr_cittadinanza for x in qry] ) )
+    tmp_cittadinanza = Counter( [x.descr_cittadinanza for x in qry] )
+    order_cittadinanza = sorted( tmp_cittadinanza.items(), key= lambda v: v[1], reverse=True )
+    data_cittadinanza = OrderedDict( order_cittadinanza )
+    
     data_genere = OrderedDict( Counter( [x.sesso for x in qry] ) )
     data_indirizzo = OrderedDict( Counter( [x.indirizzo_studi_norm for x in qry] ) )
     data_cap = OrderedDict( Counter( [x.cap_residenza for x in qry] ) )
@@ -623,7 +706,8 @@ def map_graph():
                            chart_cittadinanza=data_cittadinanza,
                            chart_genere=data_genere,
                            chart_indirizzo=data_indirizzo,
-                           chart_cap=data_cap
+                           chart_cap=data_cap,
+                           iscritti=iscritti
                            )
 
 
