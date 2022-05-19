@@ -5,6 +5,8 @@ from flask_migrate import Migrate
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_moment import Moment
+# from flask_admin import Admin
+from flask_debugtoolbar import DebugToolbarExtension
 
 
 login_manager = LoginManager()
@@ -20,6 +22,9 @@ migrate = Migrate(app, db)
 bootstrap = Bootstrap(app)
 login_manager.init_app(app)
 moment = Moment(app)
+# admin = Admin(app, name='AmaldiStoria - Admin Panel', template_mode='bootstrap3')
+
+toolbar = DebugToolbarExtension(app)
 
 
 from amaldiapp import views, models

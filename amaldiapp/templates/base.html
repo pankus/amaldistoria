@@ -1,5 +1,8 @@
 {% extends 'bootstrap/base.html' %}
 
+{% from "_macros.html" import mainCarousel %}
+
+
 {% block title %}
     AmaldiStoria
 {% endblock %}
@@ -21,11 +24,11 @@
           </div>
           <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-              <li><a id="credits" href="#">Presentazione</a></li>
+              <li><a id="presentazione" href="{{url_for('presentazione')}}">Presentazione</a></li>
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dati <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                  <li><a href="{{url_for('serie_generale')}}">Generale</a></li>
+                  <li><a id="serie_generale" href="{{url_for('serie_generale')}}">Generale</a></li>
                   <li role="separator" class="divider"></li>
                   <li class="dropdown-header">Dettaglio</li>
                   <li><a href="{{url_for('serie_indirizzo')}}">Indirizzo di studi</a></li>
@@ -42,8 +45,8 @@
                   <li><a href="{{url_for('map_graph')}}">Statistiche per anno</a></li>
                 </ul>
               </li>
-              <li><a id="mapdata" href="#">Altro</a></li>
-              <li><a id="mapdata" href="#">Voci</a></li>
+              <li><a id="immagini" href="{{url_for('immagini')}}">Immagini</a></li>
+              <li><a id="voci" href="{{url_for('voci')}}">Voci</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
               <li>
@@ -91,6 +94,17 @@
 
     {% block content %}
 
+      {% if request.path == "/" or request.path == "/index" %}
+        {{ mainCarousel() }}
+      {% endif %}
+
+      {# {% if request.path == "/voci" %}
+        {{ voiceCarousel() }}
+      {% endif %} #}
+
+      {# application content needs to be provided in the app_content block #}
+      {% block app_banner %}{% endblock %}
+
       <div class="container">
 
         {% with messages = get_flashed_messages() %}
@@ -106,6 +120,68 @@
 
       </div>
 
+
+      {% if request.path in ["/", "/index", "/credits"]%}
+        <footer class="footer">
+        
+          <div class="container">
+            <div class="row">
+        
+            <div class="col-sm-6">
+              <div class="ft-subcontainer">
+                <!-- <div class="logo-wrap">
+                  <a href="https://www.ispc.cnr.it">
+                    <img src="{{ url_for('static', filename='img/logos/ispc_mod.svg') }}" class="img-responsive" alt="Responsive image" style="height:70px">
+                  </a>
+                </div> -->
+                <div class="logo-wrap">
+                  <a href="https://www.ismed.cnr.it">
+                    <img src="{{ url_for('static', filename='img/logos/ismed_mod.png') }}" class="img-responsive" alt="Responsive image" style="height:100px">
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="ft-subcontainer">
+                <!-- <p class="ft-prose">
+                  <i class="fa fa-home" aria-hidden="true"></i> &nbsp;&nbsp;
+                  <a href="https://goo.gl/maps/G1RgkiFvnLNJnCEQ7" target="_blank">
+                    Area della Ricerca di Roma 1 – Montelibretti, Via Salaria
+                  </a>
+                </p>
+                <p class="ft-prose">
+                  <i class="fa fa-envelope" aria-hidden="true"></i> &nbsp;&nbsp;
+                  <a href="mailto:maurizio.delfreo@cnr.it?subject=Mail for LiBER editor">Maurizio Del Freo (CNR - ISPC)</a>
+                </p> -->
+                <hr>
+                <p class="ft-prose">
+                  <i class="fa fa-home" aria-hidden="true"></i> &nbsp;&nbsp;
+                  <a href="https://goo.gl/maps/EM2nuBG87s6H7MT2A" target="_blank">
+                    Via del Sudario, 44 - Roma (URT)
+                  </a>
+                </p>
+                <p class="ft-prose">
+                  <i class="fa fa-envelope" aria-hidden="true"></i> &nbsp;&nbsp;
+                  <a href="mailto:francesco.difilippo@ismed.cnr.it?subject=Mail to AmaldiStoria developer">Francesco Di Filippo (CNR - ISMed)</a>
+                </p>
+                <p class="ft-prose"> 
+                  <span class="text-muted">
+                    <small><i class="fa fa-copyright" aria-hidden="true"></i> {{ moment().format('YYYY') }} LiBER | Linear B Electronic Resources. All rights reserved </small>
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {# <div class="col-sm-4">
+              <div class="ft-subcontainer l-logo"></div>
+            </div> #}
+
+          </div>
+        </div>
+      </footer>
+    {% endif %}
+
     {% endblock %}
 
 
@@ -116,4 +192,14 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   <link href="{{ url_for('static', filename='css/assets/amaldi_simple.css') }}" rel="stylesheet">
   {# <link href="{{ url_for('static', filename='css/vendor/animate.min.css') }}" rel="stylesheet"> #}
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript">
+  $(document).ready(function () {
+    $("#{{request.endpoint}}").parent().addClass("active");
+  });
+</script>
 {% endblock %}

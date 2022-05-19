@@ -10,9 +10,9 @@
 
     <figure class="highcharts-figure">
       <div id="chart_indirizzo"></div>
-      <p class="highcharts-description">
+      <!-- <p class="highcharts-description">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur
-      </p>
+      </p> -->
     </figure>
 
     <hr>
@@ -21,18 +21,18 @@
       <div id="chart_indirizzo2"></div>
       <div id="chart_indirizzo3"></div>
       <div id="chart_indirizzo4"></div>
-      <p class="highcharts-description">
+      <!-- <p class="highcharts-description">
         {# Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur #}
-      </p>
+      </p> -->
     </figure>
 
     <hr>
 
     <figure class="highcharts-figure">
       <div id="chart_5"></div>
-      <p class="highcharts-description">
+      <!-- <p class="highcharts-description">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur
-      </p>
+      </p> -->
     </figure>
 
   </div>
@@ -62,7 +62,7 @@ $(document).ready(function(){
     },
 
     title: {
-      text: 'Rapporto su abbandono scolastico e trasferimenti'
+      text: 'Abbandono scolastico e trasferimenti'
     },
 
     subtitle: {
@@ -289,7 +289,7 @@ $(document).ready(function(){
     },
 
     title: {
-      text: 'Abbandono e trasferimenti (per nazionalità)'
+      text: 'Percentuali abbandoni e trasferimenti (per nazionalità)'
     },
 
     xAxis: {
@@ -303,8 +303,11 @@ $(document).ready(function(){
     yAxis: {
       min: 0,
       title: {
-          text: 'Numero iscritti'
+          text: 'Percentuali'
       },
+      labels: {
+        format: '{value} %'
+      }
     },
 
     legend: {

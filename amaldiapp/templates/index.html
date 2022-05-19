@@ -1,10 +1,285 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-  <div class="row">
-    <div class="col-sm-10">
-      <h1></h1>
-      <h1>prima pagina</h1>
-    </div>
-  </div>  
+<div class="row">
+  
+  {# contenuto #}
+  <div class="col-sm-12">
+
+      <div class="col-sm-8">
+          </br>
+          <p class="prose dropcap">
+            Lorem ipsum dolor sit amet, <em>consectetur adipiscing elit</em>, sed do eiusmod tempor incididunt ut labore et 
+            dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip 
+            ex ea commodo consequat. <code>Duis aute</code> irure dolor in reprehenderit in voluptate velit esse cillum dolore 
+            eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia 
+            deserunt mollit anim id est laborum.
+          </p>
+          <p class="prose">
+            Sed ut perspiciatis unde omnis iste <a href="#">natus error</a> sit voluptatem accusantium doloremque 
+            laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae 
+            vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, 
+            sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, 
+            qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora 
+            incidunt ut labore et dolore magnam aliquam quaerat voluptatem.
+          </p>
+          <blockquote>
+              <p class="prose typewriter">
+                  <u>At vero eos et accusamus et iusto odio dignissimos ducimus</u><br>
+                  &nbsp; Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, 
+                  cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat 
+                  facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem 
+                  quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates 
+                  repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente 
+                  delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus 
+                  asperiores repellat.
+              </p>
+          </blockquote>
+          <!-- <p class="prose">
+              A month later, Ventris publicly announced the results of his decipherment in a BBC radio broadcast.
+          </p> -->
+
+          {# <div class="hidden-sm hidden-md hidden-lg">
+              <audio controls style="margin: 0.4rem 0 1rem 0;">
+                  <!-- <source src="horse.ogg" type="audio/ogg"> -->
+                  <source src="{{ url_for('static', filename='media/Ventris_BBC.mp3') }}" type="audio/mpeg">
+              Your browser does not support the audio element.
+              </audio>
+              <p class="help-block">
+                  Original recording from BBC ©, July 1st 1952
+                  <a href="https://www.bbc.com/news/av/magazine-22799109"><span class="glyphicon glyphicon-link" aria-hidden="true"></span></a>
+              </p>
+          </div> #}
+
+          <!-- <p class="prose">
+              Shortly afterwards he came into contact with John Chadwick, an ancient Greek specialist from 
+              Cambridge, who collaborated with him to write the founding article of Mycenaean epigraphy, 
+              “Evidence for Greek Dialect in the Mycenaean Archives” (<em>Journal of Hellenic Studies</em> 1953) 
+              and the first reference book on Linear B, <em>Documents in Mycenaean Greek</em> (Cambridge 1956).
+          </p>
+          <blockquote>
+          <p class="prose">
+              We currently possess more than <b>6,000 Linear B inscriptions</b>, mostly from palatial 
+              contexts dating from the 14th-13th centuries BC. The vast majority of them are clay tablets 
+              of economic content.
+          </p>
+          </blockquote> -->
+          <hr>
+      </div>
+
+      <div class="col-sm-4">
+          <p class="title-box text-center prose" style="color:#fff;">
+              Un progetto del
+              <a href="https://www.liceo-amaldi.edu.it/" style="color:#fff;font-weight:700">Liceo Amaldi di Roma</a>
+              e </br>dell'
+              <a href="https://www.ismed.cnr.it" style="color:#fff;font-weight:700">Istituto di Studi sul Mediterraneo</a>
+              del Consiglio Nazionale delle Ricerche
+          </p>
+          <br>
+          <dl id="authors">
+              <h3>
+                  Coordinamento </br>
+                  <!-- scientifico e tecnico: -->
+              </h3>
+              <dt>Danilo Corradi / Susanna Mattarocci / </br>Domenico Zito</dt>
+              <dd class="dd-sub"><em>Liceo Amaldi (Roma)</em></dd>
+              <dt>Michele Colucci / Francesco Di Filippo</dt>
+              <dd class="dd-sub"><em>ISMed (CNR)</em></dd>
+              <dt>Giulia Zitelli Conti <small> &nbsp;/&nbsp; </small></dt>
+              <dd class="dd-sub"><em>Associazione Italiana di Storia Orale (AISO)</em></dd>
+              <!-- <dt>Susanna Mattarocci <small> &nbsp;/&nbsp; </small></dt>
+              <dd class="dd-sub"><em>Liceo Amaldi (Roma)</em></dd> -->
+              <!-- <dt>Mimmo <small> &nbsp;/&nbsp; </small></dt>
+              <dd class="dd-sub"><em>Liceo Amaldi (Roma)</em></dd>
+              <dt>Michele Colucci <small> &nbsp;/&nbsp; </small></dt>
+              <dd class="dd-sub"><em>ISMed (CNR)</em></dd>
+              <dt>Francesco Di Filippo <small> &nbsp;/&nbsp; </small></dt>
+              <dd class="dd-sub"><em>ISMed (CNR)</em></dd>
+              <dt>Giulia Zitelli Conti <small> &nbsp;/&nbsp; </small></dt>
+              <dd class="dd-sub"><em>Associazione Italiana di Storia Orale (AISO)</em></dd> -->
+          </dl>
+          <dl id="authors">
+            <h3>Realizzazione</h3>
+          </dl>
+          <div class="clearfix"></div>
+          
+          {# <div class="hidden-xs">
+              <audio controls style="margin: 5rem 0 1rem 0;">
+                  <!-- <source src="horse.ogg" type="audio/ogg"> -->
+                  <source src="{{ url_for('static', filename='media/Ventris_BBC.mp3') }}" type="audio/mpeg">
+              Your browser does not support the audio element.
+              </audio>
+              <p class="help-block">
+                  Original recording from BBC ©, July 1st 1952
+                  &nbsp; <a href="https://www.bbc.com/news/av/magazine-22799109"><span class="glyphicon glyphicon-link" aria-hidden="true"></span></a>
+              </p>
+          </div> #}
+
+      </div>
+
+      <div class="col-sm-8">
+          <h2 style="margin-bottom: 15px;">Il Progetto</h2>
+          <p class="prose ">
+            Lorem ipsum dolor sit amet, <em>consectetur adipiscing elit</em>, sed do eiusmod tempor incididunt ut labore et 
+            dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip 
+            ex ea commodo consequat. <code>Duis aute</code> irure dolor in reprehenderit in voluptate velit esse cillum dolore 
+            eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia 
+            deserunt mollit anim id est laborum.
+          </p>
+          
+          {# <blockquote>
+          <p class="prose">
+              Currently, the <a href="{{url_for('tabletList')}}">database</a> contains all the Linear B documents from <strong>Knossos</strong>, <strong>Mycenae</strong>, <strong>Tiryns</strong>, and <strong> Midea</strong>.
+          </p>
+          </blockquote> #}
+          
+          <p class="prose dropcap">
+            Sed ut perspiciatis unde omnis iste <a href="#">natus error</a> sit voluptatem accusantium doloremque 
+            laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae 
+            vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, 
+            sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, 
+            qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora 
+            incidunt ut labore et dolore magnam aliquam quaerat voluptatem.
+          </p>
+          <p class="prose">
+              
+          </p>
+          {# <p class="prose">
+              The <a href="{{url_for('search')}}">search engine</a> allows users to filter and combine documents based on textual, palaeographic, topographic, and chronological criteria. 
+              It also supports “regular expressions”, co-occurrences and other types of queries like contiguities and associations. The resultsets of 
+              the queries are indexed according to the rules commonly used for Linear B indexes and can be viewed either as lists of documents or as findspot 
+              distributions on <a href="{{url_for('mapdata')}}"> interactive maps</a>.
+          </p> #}
+
+      </div>
+
+      <div class="col-sm-4">
+          <div class="panel panel-default" style="margin-top: 20px;">
+              <div class="panel-heading">
+                  <h3 class="panel-title">AmaldiStoria in numeri:</h3>
+              </div>
+              <div class="panel-body">
+                  <ul class="list-group">
+                      <li class="list-group-item">
+                          <span class="badge"> 4406 </span>
+                          <a href="#">Documents:</a>
+                      </li>
+                      <li class="list-group-item">
+                          <span class="badge"> 17901 </span>
+                          <a href="#">Words:</a>
+                      </li>
+                      <li class="list-group-item">
+                          <span class="badge"> 4677 </span>
+                          <a href="#">Unique forms:</a>
+                      </li>
+                      <li class="list-group-item">
+                          <span class="badge"> 34748 </span>
+                          <a href="#">Total signs:</a>
+                      </li>
+                  </ul>
+              </div>
+          </div>
+
+          <br>
+          {# <h3 class="panel-title text-right" style="margin-bottom: 3px ">Collaborations and credits</h3>
+          <p class="prose text-right">
+              C. Alonso Moreno (Universidad Autónoma de Madrid) <br><small>\ Knossos texts (Sk – Xf) encoding and database entry</small></br>
+          </p>
+          <p class="prose text-right">
+              Barbara Foschi (CNR-ISPC) <br><small>\ Photographs digitization </small>
+          </p>
+          <p class="prose text-right">
+              C. Alonso Moreno, 
+              M. Iodice (PhD, Università Cattolica di Milano), 
+              and R. Pierini (PhD, Università di Bologna) are currently working on semantic annotation.</br>
+          </p> #}
+      
+      </div>
+
+      <div class="clearfix"></div>
+      <hr>
+      <!-- <div class="col-sm-4">
+          <p class="prose">
+              All document images are reproduced with the <em>Greek Ministry of Culture and Sports’</em> kind 
+              permission and are intended for personal, non-profit use only. The rights of the depicted documents 
+              belong to the Greek Ministry of Culture and Sports (Greek Law 3028/2002). Any reproduction or 
+              publication in whatever form (print, digital, etc.) is strictly prohibited.
+          </p>
+      </div>
+      <div class="col-sm-4">
+          <p class="prose">
+              Texts are reproduced with the kind permission of their respective authors. Their limited re-use in 
+              scholarly work is allowed according to common academic practices, in which case users are kindly 
+              requested to include a reference to LiBER and its URL > <a href="http://liber.cnr.it/">liber.cnr.it</a> <.
+          </p>
+      </div>
+      <div class="col-sm-4">
+          <p class="prose">
+              Both text encoding and search engine have been adapted to Linear B from the 
+              <a href="https://www.degruyter.com/document/doi/10.1515/9783110607208-005/html">Progetto Sinleqiunnini</a>, 
+              a Document Management System developed by Francesco Di Filippo, already employed for the cuneiform archives 
+              from <a href="http://ebda.cnr.it/">Ebla</a> and <a href="http://virgo.unive.it/emaronline/cgi-bin/index.cgi">Emar</a>.
+          </p>
+      </div> -->
+      
+      {# <div class="col-sm-4">
+          <div class="panel panel-box">
+              <div class="panel-thumbnail"><img src="{{ url_for('static', filename='img/museum.jpg') }}" class="img-responsive"></div>
+              <div class="panel-body">
+              <!-- <h3 id="panel-h3" class="text-center">Materials</h3> -->
+              <h3 id="panel-h3">Materials</h3>
+              <p class="prose">All document images are reproduced with the kind permission of the 
+                  <a href="https://www.culture.gov.gr/en/SitePages/default.aspx">Hellenic Ministry of Culture and Sports</a> 
+                  and are intended for personal, non-profit use only. The rights of the depicted documents 
+                  belong to the Hellenic Ministry of Culture and Sports (Greek Law 3028/2002). 
+                  <!-- Any reproduction or publication in whatever form (print, digital, etc.) is strictly prohibited. -->
+              <span class="text-muted">
+                  © Hellenic Ministry of Culture and Sports / Hellenic Cultural Resources
+                  Managing and Development Organization (HCRMDO)
+              </span>
+              </p>
+              </div>
+          </div>
+      </div> #}
+
+      {# <div class="col-sm-4">
+          <div class="panel panel-box">
+              <div class="panel-thumbnail"><img src="{{ url_for('static', filename='img/permission.jpg') }}" class="img-responsive"></div>
+              <div class="panel-body">
+              <h3 id="panel-h3">Terms of use</h3>
+              <p class="prose">Texts are reproduced with the kind permission of their respective authors. Their limited re-use in 
+                  scholarly works is allowed according to standard academic practices. In this case, please include a reference 
+                  to LiBER in the following form:
+              </br>
+              <span class="text-muted">
+                  Del Freo M., Di Filippo F. 2019, <em>Linear B Electronic Resources (LiBER v.2)</em>, viewed 16 March 2021, 
+                  <a href="https://liber.cnr.it/">&lt;https://liber.cnr.it/&gt;</a>.
+              </span>
+              </p>
+              </div>
+          </div>
+      </div> #}
+
+      {# <div class="col-sm-4">
+          <div class="panel panel-box">
+              <div class="panel-thumbnail"><img src="{{ url_for('static', filename='img/code.jpg') }}" class="img-responsive"></div>
+              <div class="panel-body">
+              <h3 id="panel-h3">Development</h3>
+              <p class="prose">Both text encoding and search engine have been adapted to Linear B from the 
+                  <a href="https://www.degruyter.com/document/doi/10.1515/9783110607208-005/html">Progetto Sinleqiunnini</a>, 
+                  a Document Management System developed by Francesco Di Filippo, already employed for the cuneiform archives 
+                  from <a href="http://ebda.cnr.it/">Ebla</a> and <a href="http://virgo.unive.it/emaronline/cgi-bin/index.cgi">Emar</a>.</p>
+              </div>
+          </div>
+      </div> #}
+
+      <!-- <div class="clearfix"></div>
+      <hr> -->
+
+  </div>
+  {# contenuto END col-sm-8 #}
+
+  <!-- <div class="col-sm-1"></div> {# margine destro #} -->
+
+</div>
 {% endblock %}

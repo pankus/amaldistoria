@@ -42,6 +42,7 @@ class User(UserMixin, db.Model):
 
 class Alunno(db.Model):
     __tablename__ = "alunni"
+    
     id = db.Column(db.Integer, primary_key=True)
     anno_ref = db.Column(db.String(128))
     id_alunno = db.Column(db.Integer, db.ForeignKey('indirizzo.id_alunno'))
@@ -104,18 +105,24 @@ class Alunno(db.Model):
     #     return func.coalesce(self.d_fase, '') + ' ' + \
     #         func.coalesce(self.d_period, '') + ' ' + \
     #         func.coalesce(self.d_sub, '')
+    
+    def __repr__(self):
+        return '{}'.format(self.id_alunno)
 
 
 class Indirizzo(db.Model):
-	__tablename__ = "indirizzo"
-	id_alunno = db.Column(db.Integer, primary_key=True)
-	osm_indirizzo_ref = db.Column(db.String(128))
-	osm_road = db.Column(db.String(128))
-	osm_house_number = db.Column(db.String(128))
-	osm_house_number_dev = db.Column(db.String(128))
-	osm_postcode = db.Column(db.String(128))
-	osm_suburb = db.Column(db.String(128))
-	osm_city = db.Column(db.String(128))
-	osm_lat = db.Column(db.Float)
-	osm_lon = db.Column(db.Float)
-	geom = db.Column(Geometry(geometry_type='POINT', srid=4326))
+    __tablename__ = "indirizzo"
+    id_alunno = db.Column(db.Integer, primary_key=True)
+    osm_indirizzo_ref = db.Column(db.String(128))
+    osm_road = db.Column(db.String(128))
+    osm_house_number = db.Column(db.String(128))
+    osm_house_number_dev = db.Column(db.String(128))
+    osm_postcode = db.Column(db.String(128))
+    osm_suburb = db.Column(db.String(128))
+    osm_city = db.Column(db.String(128))
+    osm_lat = db.Column(db.Float)
+    osm_lon = db.Column(db.Float)
+    geom = db.Column(Geometry(geometry_type='POINT', srid=4326))
+
+    def __repr__(self):
+        return '{} ({})'.format(self.osm_road, self.osm_postcode)

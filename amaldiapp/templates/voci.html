@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% from "_macros.html" import pageCarousel %}
+
+
+{% block app_banner %}
+  
+  {{ pageCarousel('Voci', 'img/carousel/carousel_a.jpg') }}
+
+{% endblock %}
+
+
+{% block app_content %}
+
+<div class="row">
+  <div class="col-md-12">
+    <p class="prose dropcap">
+      Per valorizzare la <code>storia del Liceo “Amaldi”</code>, sono state raccolte testimonianze di insegnanti, studenti e 
+      studentesse che hanno lavorato o frequentato la scuola a partire dalla sua istituzione. Queste <code>“voci delle memoria”</code> 
+      sono state registrate nel rispetto delle <a target=_blank href="https://www.aisoitalia.org/buone-pratiche/"> buone pratiche per la storia orale</a> 
+      dell'Associazione Italiana di Storia Orale per mezzo video e audio. Se ne presenta qui un primo nucleo, che 
+      potrà essere ampliato nel prossimo futuro.
+    </p>
+    <p class="prose">
+      Le fonti orali rappresentano documenti preziosi per la loro aderenza alla vita degli uomini e delle donne che 
+      attraversano la storia con le loro biografie singole e collettive. Ci narrano aspetti della vita quotidiana 
+      difficilmente reperibili in altre tipologie documentarie. Si presentano uniche ed irripetibili poiché costruite 
+      nel dialogo tra intervistato ed intervistatore e si è perciò scelto di affidare completamente agli studenti e 
+      alle studentesse coinvolti nel progetto le decisioni in merito alle modalità di ripresa e alle domande da porre, 
+      con qualche indicazione preliminare volta ad orientarli.
+    </p>
+    <p class="prose">
+      Hanno partecipato al gruppo interviste: Silvia Longo, Chiara Colaianni, Cecilia Testoni, Marialetizia Fiorenza, 
+      Linda Petruccetti, Danilo Zollino, Niccolò Marino, coordinati dalla prof.ssa Susanna Mattarocci e 
+      dalla dott.ssa Giulia Zitelli Conti.
+    </p>
+  </div>
+</div>
+
+<!-- START THE FEATURETTES -->
+
+<hr class="featurette-divider">
+
+<div class="row featurette">
+  <div class="col-md-7">
+    <h2 class="featurette-heading">First featurette heading. <span class="text-muted">It'll blow your mind.</span></h2>
+    <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+  </div>
+  <div class="col-md-5">
+    <img class="featurette-image img-responsive center-block" data-src="holder.js/500x500/auto" alt="Generic placeholder image">
+  </div>
+</div>
+
+<hr class="featurette-divider">
+
+<div class="row featurette">
+  <div class="col-md-7 col-md-push-5">
+    <h2 class="featurette-heading">Oh yeah, it's that good. <span class="text-muted">See for yourself.</span></h2>
+    <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+  </div>
+  <div class="col-md-5 col-md-pull-7">
+    <img class="featurette-image img-responsive center-block" data-src="holder.js/500x500/auto" alt="Generic placeholder image">
+  </div>
+</div>
+
+<hr class="featurette-divider">
+
+<div class="row featurette">
+  <div class="col-md-7">
+    <h2 class="featurette-heading">And lastly, this one. <span class="text-muted">Checkmate.</span></h2>
+    <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+  </div>
+  <div class="col-md-5">
+    <img class="featurette-image img-responsive center-block" data-src="holder.js/500x500/auto" alt="Generic placeholder image">
+  </div>
+</div>
+
+<hr class="featurette-divider">
+
+<!-- /END THE FEATURETTES -->
+
+{% endblock %}
