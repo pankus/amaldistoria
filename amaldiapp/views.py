@@ -229,8 +229,8 @@ def mapdata():
                             tiles=None,
                             control_scale=True)
     
-    folium.TileLayer(tiles='Stamen Toner', name='Stamen Toner', show=True).add_to(folium_map)
-    folium.TileLayer(tiles='Stamen Terrain', name='Stamen Terrain', show=True).add_to(folium_map)
+    # folium.TileLayer(tiles='Stamen Toner', name='Stamen Toner', show=True).add_to(folium_map)
+    # folium.TileLayer(tiles='Stamen Terrain', name='Stamen Terrain', show=True).add_to(folium_map)
     folium.TileLayer(tiles='https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
                      attr='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> \
                            contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -418,8 +418,8 @@ def mapdata_time():
                             tiles=None,
                             control_scale=True)
     
-    folium.TileLayer(tiles='Stamen Toner', name='Stamen Toner', show=True).add_to(folium_map)
-    folium.TileLayer(tiles='Stamen Terrain', name='Stamen Terrain', show=True).add_to(folium_map)
+    # folium.TileLayer(tiles='Stamen Toner', name='Stamen Toner', show=True).add_to(folium_map)
+    # folium.TileLayer(tiles='Stamen Terrain', name='Stamen Terrain', show=True).add_to(folium_map)
     folium.TileLayer(tiles='https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
                      attr='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> \
                            contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -582,8 +582,8 @@ def map_graph():
                             tiles=None,
                             control_scale=True)
     
-    folium.TileLayer(tiles='Stamen Toner', name='Stamen Toner', show=True).add_to(folium_map)
-    folium.TileLayer(tiles='Stamen Terrain', name='Stamen Terrain', show=True).add_to(folium_map)
+    # folium.TileLayer(tiles='Stamen Toner', name='Stamen Toner', show=True).add_to(folium_map)
+    # folium.TileLayer(tiles='Stamen Terrain', name='Stamen Terrain', show=True).add_to(folium_map)
     folium.TileLayer(tiles='https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
                      attr='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> \
                            contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -1033,3 +1033,7 @@ def serie_stato():
                            stato_indirizzo_data=stato_indirizzo_data,
                            stato_nation=stato_nation
                           )
+    
+@app.route('/test')
+def test():
+    return render_template('test.html')
