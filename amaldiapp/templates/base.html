@@ -49,14 +49,14 @@
               <li><a id="voci" href="{{url_for('voci')}}">Voci</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-              <li>
+              <!-- <li>
                 <form class="navbar-form navbar-right" role="search">
                   <div class="form-group has-feedback">
                     <input id="searchtab" type="text" placeholder="" class="form-control">
                     <span id="searchicon" class="fa fa-search form-control-feedback"></span>
                   </div>
                 </form>
-              </li>
+              </li> -->
               {% if current_user.is_authenticated %}
               <li class="dropdown user user-menu">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -121,7 +121,7 @@
       </div>
 
 
-      {% if request.path in ["/", "/index", "/credits"]%}
+      {# {% if request.path in ["/", "/index", "/credits", "/voci", "/immagini" ]%} #}
         <footer class="footer">
         
           <div class="container">
@@ -158,7 +158,7 @@
                 <p class="ft-prose">
                   <i class="fa fa-home" aria-hidden="true"></i> &nbsp;&nbsp;
                   <a href="https://goo.gl/maps/EM2nuBG87s6H7MT2A" target="_blank">
-                    Via del Sudario, 44 - Roma (URT)
+                    Via Gerolamo Cardano, 135 - Roma
                   </a>
                 </p>
                 <p class="ft-prose">
@@ -167,7 +167,9 @@
                 </p>
                 <p class="ft-prose"> 
                   <span class="text-muted">
-                    <small><i class="fa fa-copyright" aria-hidden="true"></i> {{ moment().format('YYYY') }} LiBER | Linear B Electronic Resources. All rights reserved </small>
+                    <small><i class="fa fa-copyright" aria-hidden="true"></i>
+                    <a href="http://mdhlab.cnr.it/">MDHLab | CNR - ISMed</a>
+                    </small>
                   </span>
                 </p>
               </div>
@@ -180,7 +182,7 @@
           </div>
         </div>
       </footer>
-    {% endif %}
+    {# {% endif %} #}
 
     {% endblock %}
 
