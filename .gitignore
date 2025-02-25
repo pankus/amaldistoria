@@ -4,3 +4,4 @@ venv
 _amaldi.conf
 *.pyc
 __pycache__
+.python-version

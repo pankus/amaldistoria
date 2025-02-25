@@ -4,7 +4,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import func, Integer
+from sqlalchemy import func, Integer, select
 from flask import request
 
 
@@ -189,8 +189,23 @@ class Strada(db.Model):
     osm_lat = db.Column(db.Float)
     osm_lon = db.Column(db.Float)
     geom = db.Column(Geometry(geometry_type='POINT', srid=4326))
+    data_create = db.Column(db.DateTime(), default=datetime.utcnow)
+    data_update = db.Column(db.DateTime(), default=datetime.utcnow,
+                         onupdate=datetime.utcnow)
     
     alunni = db.relationship('Alunno', secondary='rel_alunno_strada', back_populates='strade')
+    
+    @hybrid_property
+    def alunni_nr(self):
+        # Conteggio degli alunni associati a questa strada
+        return len(self.alunni)
+
+    @alunni_nr.expression
+    def alunni_nr(cls):
+        # Query SQL per contare gli alunni associati a una strada
+        return select(func.count(rel_alunno_strada.c.alunno_id)).where(
+            rel_alunno_strada.c.strada_id == cls.id
+        ).label('alunni_count')
 
     def __repr__(self):
         # return '{} ({})'.format(self.osm_road, self.osm_postcode)
