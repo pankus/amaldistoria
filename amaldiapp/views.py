@@ -1,4 +1,4 @@
-from flask import render_template, Markup, request, jsonify, json, flash, redirect, url_for
+from flask import render_template, request, jsonify, json, flash, redirect, url_for
 from flask_login import login_required, login_user, logout_user, current_user
 from amaldiapp import app, db
 from sqlalchemy.sql import text, func, and_
@@ -161,7 +161,10 @@ class ResidenzaAlunno(ModelView):
     
     can_delete = False
     can_create = False
-    column_list = ['osm_road', 'osm_house_number', 'osm_postcode', 'osm_suburb', 'osm_city', 'alunni' ]
+    
+    column_list = ['osm_road', 'osm_house_number', 'osm_postcode', 'osm_suburb', 'osm_city', 'alunni_nr', 'alunni' ]
+    column_searchable_list = ['osm_road', 'alunni.indirizzo_residenza']
+    
     form_columns = ['osm_road', 'osm_house_number', 'osm_postcode', 'osm_suburb', 'osm_city', 'alunni' ]
     form_ajax_refs = {
         'alunni': {
@@ -204,9 +207,9 @@ class StradaAdmin(ModelView):
     edit_template = create_template
     
     # List view customization
-    column_list = ['osm_road', 'osm_house_number', 'osm_postcode', 'osm_city', 'osm_suburb', 'osm_type', 'osm_lat', 'osm_lon']
+    column_list = ['alunni_nr', 'osm_road', 'osm_house_number', 'osm_postcode', 'osm_city', 'osm_suburb', 'osm_type', 'osm_lat', 'osm_lon']
     column_searchable_list = ['osm_road', 'osm_city', 'osm_postcode']
-    column_filters = ['osm_city', 'osm_postcode', 'osm_type']
+    column_filters = ['alunni_nr', 'osm_city', 'osm_postcode', 'osm_type']
     
     # Form customization
     form_columns = [
