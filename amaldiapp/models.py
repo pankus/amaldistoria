@@ -5,8 +5,18 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import func, Integer
+from flask import request
 
 
+""" recupera il vero IP degli utenti """
+def get_client_ip():
+    if request.headers.getlist("X-Forwarded-For"):
+        return request.headers.getlist("X-Forwarded-For")[0]
+    elif request.headers.get("X-Real-IP"):
+        return request.headers.get("X-Real-IP")
+    else:
+        return request.remote_addr
+    
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
@@ -18,6 +28,11 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), unique=True, index=True)
     interest = db.Column(db.Text)
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
+    last_login_at = db.Column(db.DateTime())
+    current_login_at = db.Column(db.DateTime())
+    last_login_ip = db.Column(db.String())
+    current_login_ip = db.Column(db.String())
+    login_count = db.Column(db.Integer)
 
     # notes = db.relationship('ParolaNota', back_populates="useredit")
 
@@ -31,6 +46,14 @@ class User(UserMixin, db.Model):
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    def update_login_info(self, ip_address):
+        self.last_login_at = self.current_login_at
+        self.last_login_ip = self.current_login_ip
+        self.current_login_at = datetime.utcnow()
+        self.current_login_ip = get_client_ip()
+        self.login_count = (self.login_count or 0) + 1
+        db.session.commit()
 
     def __repr__(self):
         return '<User %r>' % self.username
