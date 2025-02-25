@@ -19,6 +19,8 @@ from flask_admin.contrib.sqla import ModelView
 from flask_admin.form import SecureForm, rules
 from flask_admin.model.form import InlineFormAdmin
 
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from wtforms import StringField, FloatField, HiddenField
 from wtforms.validators import DataRequired
 
