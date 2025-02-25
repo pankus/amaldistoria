@@ -45,6 +45,35 @@ class HomeView(AdminIndexView):
     @expose('/')
     def admin_index(self):
         return self.render(url_for(index))
+    
+
+class CustomUser(ModelView):
+    def is_accessible(self):
+        if current_user.is_authenticated and current_user.role in ['adm']:
+            return current_user.is_authenticated
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login'))
+    
+    can_view_details = True
+    details_modal = True
+    
+    column_display_pk = True
+    column_default_sort = ('id')
+    column_list = ["id", "username", "name", "role", "email",
+                   "last_login_at", "current_login_at", "last_login_ip", "current_login_ip",
+                   "login_count"]
+    form_columns = ["username", "role", "name", "email", "password_clear"]
+    form_choices = {
+        'role': [('adm', 'Administrator'), ('adv', 'Advanced user'),
+                 ('usr', 'User'), ('rdr', 'Reader')]
+    }
+    
+    def on_model_change(self, form, model, is_created):
+        # Gestisci l'hashing della password
+        if form.password_clear.data:
+            model.password_hash = generate_password_hash(form.password_clear.data)
+        
 
 class customAlunno(ModelView):
     def is_accessible(self):
@@ -72,6 +101,13 @@ class customAlunno(ModelView):
     # column_filters = [c.name for c in Alunno.__table__.columns]
 
 class AlunnoMedia(ModelView):
+    def is_accessible(self):
+        if current_user.is_authenticated and current_user.role in ['adv', 'adm']:
+            return current_user.is_authenticated
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login'))
+    
     can_delete = False
     can_create = False
     can_edit = False
@@ -335,6 +371,7 @@ admin.add_view(ResidenzaAlunno(Strada, db.session, category='Geolocalizzazione',
                                endpoint='residenzaalunno', name='Indirizzo > Alunni'))
 admin.add_view(StradaAdmin(Strada, db.session, category='Geolocalizzazione',
                            endpoint='geocoder', name='Crea/edita indirizzi'))
+admin.add_view(CustomUser(User, db.session))
 admin.add_link(MenuLink(name='AmaldiStoria Homepage', url='/'))
 
 
@@ -355,6 +392,7 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
+            user.update_login_info(request.remote_addr)
             return redirect(request.args.get('next') or url_for('index'))
         flash(u'Invalid username or password.', 'danger')
 
