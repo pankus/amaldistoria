@@ -337,3 +337,31 @@ li.user-header {
 /*#videos * {
   font-size: 110%;
 }*/
+
+
+
+.highcharts-container text {
+  /* font-family: Arial, sans-serif; */
+  font-size: 12px !important; /* Dimensione predefinita del testo */
+}
+
+.highcharts-title {
+  font-size: 20px !important; /* Dimensione del titolo */
+  font-weight: bold !important;
+}
+
+.highcharts-subtitle {
+  font-size: 16px !important; /* Dimensione del sottotitolo */
+}
+
+.highcharts-axis-labels {
+  font-size: 14px !important; /* Dimensione delle etichette degli assi */
+}
+
+.highcharts-data-labels {
+  font-size: 14px !important; /* Dimensione delle etichette dei dati */
+}
+
+.highcharts-tooltip {
+  font-size: 13px !important; /* Dimensione del testo del tooltip */
+}

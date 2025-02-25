@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+
+{% block head %}
+{{ super() }}
+
+  {{ map_header }}
+
+{% endblock %}
+
+
+{% block app_content %}
+  <div class="row">
+
+    <div class="col-sm-4">
+      <form method="post">
+        <div class="form-group">
+          <select class="form-control" id="selanno" name="anno" onchange="this.form.submit()">
+          	{% for param in params|reverse %}
+          	  {% if param == request.anno %}
+          	  <option value="{{param}}" selected> {{param}} </option>
+          	  {% else %}
+          	  <option value="{{param}}"> {{param}} </option>
+          	  {% endif %}
+          	{% endfor %}
+          </select>
+        </div>
+      </form>
+    </div>
+
+     <div class="col-sm-8">
+     	<button class="btn btn-primary" type="button">
+ 			  iscritti &nbsp;&nbsp;<span class="badge">{{ punti_nr }}</span>
+ 			</button>
+     	Anno Accademico <strong> {{ param }} </strong> 
+     	(disatnza media: {{ "%.2f"|format(dist_media[0][0]|float) }} metri)
+     	(disatnza media: {{ dist_media[0][0]|round }} metri)
+    </div>
+  </div>
+
+  <div class="row">
+  	<div class="col-sm-12 map_container">
+  		<div id="map">
+  			{# {{ map_div }} #}
+  			{{ folium_map._repr_html_()|safe }}
+        {# {% include "line_map.html" %} #}
+  		</div>
+  	</div>
+  </div>
+
+  <div class="row">
+  	<h1>sldvnlsdknvlsdk</h1>
+  </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+  <script type="text/javascript">
+  	{{ map_script }}
+  </script>
+{% endblock %}

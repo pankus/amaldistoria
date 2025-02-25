@@ -47,6 +47,14 @@
 <script type='text/javascript'>
 $(document).ready(function(){
 
+  Highcharts.setOptions({
+    xAxis: {
+      labels: {
+        y: 35 // Imposta la distanza globale tra le etichette e l'asse x
+      }
+    }
+  });
+  
   let chart1 = Highcharts.chart('chart_indirizzo', {
 
     chart: {

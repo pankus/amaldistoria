@@ -1,0 +1,118 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block title %}
+    {% if title %}{{ title }} - AmaldiStoria {% else %}AmaldiStoria{% endif %}
+{% endblock %}
+
+{% block navbar %}
+  <nav class="navbar navbar-default navbar-fixed-top">
+
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="{{url_for('index')}}">
+        {# <span><img style="width:34px; margin-top: -7px;" alt="Brand" src="{{ url_for('static', filename='favico/apple-icon-180x180.png') }}"></span> #}
+        <span class="navbar-brand-txt" style="margin-top: -7px;">&nbsp; AmaldiStoria</span>
+      </a>
+    </div>
+
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li><a id="credits" href="#">Credits</a></li>
+        {# <li><a id="tabletList" href="#">Database</a></li> #}
+        <li><a id="mapdata" href="{{url_for('mapdata')}}">Map</a></li>
+        {# <li><a id="search" href="#">Search</a></li> #}
+        
+
+        {% if current_user.role == 'adm' %}
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="{{url_for('tabletAdd')}}">Insert New Tablet</a></li>
+            <li role="separator" class="divider"></li>
+            <li class="dropdown-header">Admin views</li>
+            <li><a href="#">Users list</a></li>
+            <li><a href="#">One more separated link</a></li>
+          </ul>
+        </li>
+        {% endif %}
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+          <form class="navbar-form navbar-right" role="search">
+            <div class="form-group has-feedback">
+              <input id="searchtab" type="text" placeholder="" class="form-control">
+              <span id="searchicon" class="fa fa-search form-control-feedback"></span>
+            </div>
+          </form>
+        </li>
+        {% if current_user.is_authenticated %}
+        <li class="dropdown user user-menu">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            <img src="{{ url_for('static', filename='img/user.jpg') }}" class="user-image" alt="User Image">
+            <span class="hidden-xs">{{current_user.username}}</span>
+          </a>
+          <ul class="dropdown-menu">
+
+            <li class="user-header">
+              <img src="{{ url_for('static', filename='img/user.jpg') }}" class="img-circle" alt="User Image">
+              <p>
+                {{current_user.name}} {{current_user.username}}
+              </p>
+              <p><small>Registrato {{moment(current_user.member_since).fromNow(refresh=True)}}</small></p>
+            </li>
+
+            <li class="user-footer">
+              <div class="pull-right">
+                <a href="{{ url_for('logout') }}" class="btn btn-default btn-flat">Sign out</a>
+              </div>
+            </li>
+
+          </ul>
+        </li>
+        {% else %}
+        <li class="dropdown user user-menu">
+          <a href="{{ url_for('login') }}"><i class="glyphicon glyphicon-leaf"></i> Login</a></li>
+        </li>
+        {% endif %}
+      </ul>
+
+    </div>   <!--/.nav-collapse -->
+
+  </nav>
+{% endblock %}
+
+
+
+{% block content %}
+    <div class="container-fluid">
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-info" role="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {# application content needs to be provided in the app_content block #}
+        {% block app_content %}{% endblock %}
+
+    </div>
+{% endblock %}
+
+
+
+{% block styles %}
+{{ super() }}
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Raleway:200,400" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="{{ url_for('static', filename='css/assets/amaldi.css') }}" rel="stylesheet">
+  {# <link href="{{ url_for('static', filename='css/vendor/animate.min.css') }}" rel="stylesheet"> #}
+{% endblock %}
