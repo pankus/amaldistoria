@@ -1453,7 +1453,13 @@ def serie_stato():
                            stato_indirizzo_data=stato_indirizzo_data,
                            stato_nation=stato_nation
                           )
-    
+
+
 @app.route('/test')
 def test():
     return render_template('test.html')
+
+
+@app.route('/territorio')
+def map_gloglo():
+    return render_template('map_territorio.html')
