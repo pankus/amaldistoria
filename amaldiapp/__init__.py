@@ -27,4 +27,4 @@ moment = Moment(app)
 toolbar = DebugToolbarExtension(app)
 
 
-from amaldiapp import views, models
+from app import views, models
