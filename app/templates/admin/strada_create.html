@@ -1,0 +1,236 @@
+{% extends 'admin/model/create.html' %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+.search-results {
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.search-result-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.search-result-item:hover {
+    background-color: #f5f5f5;
+}
+
+.selected-address {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #e8f5e9;
+    border-radius: 4px;
+    display: none;
+}
+
+.coordinates-group input {
+    width: 120px;
+    display: inline-block;
+    margin-right: 10px;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h2>{{ admin_view.name }} - Crea un nuovo indirizzo e modifica uno esistente</h2>
+    
+    <form action="" method="POST" class="form-horizontal" id="strada-form">
+        {{ form.csrf_token }}
+        <input type="hidden" name="selected_address" id="selected-address-data">
+        
+        <div class="form-group">
+            <div class="col-md-12">
+                <h4>Cerca indirizzo</h4>
+                <p class="help-block">Inserisci l'indirizzo completo per cercarlo su OpenStreetMap (non permette di cercare i civici)</p>
+                <p class="help-block"> <u>Nota bene</u>: in alcuni casi potrebbe essere difficile o impossibile trovare il corretto indirizzo. In questi casi testare la grafia attraverso <a href="https://www.openstreetmap.org/#map=14/41.85719/12.63200" target="_blank">Nominatim</a> o <a href="https://www.google.it/maps/@41.8693328,12.6370968,5092m" target="_blank">Google map</a></p>
+                <input type="text" id="address-search" class="form-control" 
+                       placeholder="Es: Via Roma 1, Milano">
+                <div id="search-results" class="search-results"></div>
+                <div id="selected-address" class="selected-address"></div>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <div class="form-group">
+            <div class="col-md-12">
+                <h4>Dettagli indirizzo</h4>
+                <p class="help-block">I campi verranno compilati automaticamente dopo la selezione dell'indirizzo</p>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="col-md-2 control-label">Via</label>
+            <div class="col-md-10">
+                {{ form.osm_road(class="form-control", readonly=True) }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-2 control-label">Numero civico</label>
+            <div class="col-md-5">
+                {{ form.osm_house_number(class="form-control", readonly=True) }}
+            </div>
+            <label class="col-md-2 control-label">Interno/Scala</label>
+            <div class="col-md-3">
+                {{ form.osm_house_number_dev(class="form-control", readonly=True) }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-2 control-label">CAP</label>
+            <div class="col-md-4">
+                {{ form.osm_postcode(class="form-control", readonly=True) }}
+            </div>
+            <label class="col-md-2 control-label">Quartiere</label>
+            <div class="col-md-4">
+                {{ form.osm_suburb(class="form-control", readonly=True) }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-2 control-label">Città</label>
+            <div class="col-md-6">
+                {{ form.osm_city(class="form-control", readonly=True) }}
+            </div>
+            <label class="col-md-2 control-label">Tipo</label>
+            <div class="col-md-2">
+                {{ form.osm_type(class="form-control", readonly=True) }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-2 control-label">Coordinate</label>
+            <div class="col-md-10">
+                <div class="coordinates-group">
+                    {{ form.osm_lat(class="form-control", readonly=True, placeholder="Latitudine") }}
+                    {{ form.osm_lon(class="form-control", readonly=True, placeholder="Longitudine") }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" class="btn btn-primary" value="Salva" id="submit-btn" disabled>
+                <a href="{{ return_url }}" class="btn btn-default">Annulla</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('address-search');
+    const searchResults = document.getElementById('search-results');
+    const selectedAddress = document.getElementById('selected-address');
+    const selectedAddressData = document.getElementById('selected-address-data');
+    const submitBtn = document.getElementById('submit-btn');
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(searchAddress, 500);
+    });
+
+    async function searchAddress() {
+        const query = searchInput.value.trim();
+        if (query.length < 3) {
+            searchResults.style.display = 'none';
+            return;
+        }
+
+        try {
+            const response = await fetch(`{{ url_for('search_address') }}?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            
+            if (data.error) {
+                showError(data.error);
+                return;
+            }
+
+            displaySearchResults(data);
+        } catch (error) {
+            showError('Errore durante la ricerca');
+        }
+    }
+
+    function displaySearchResults(results) {
+        searchResults.innerHTML = '';
+        
+        if (results.length === 0) {
+            searchResults.innerHTML = '<div class="search-result-item">Nessun risultato trovato</div>';
+        } else {
+            results.forEach(result => {
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                div.textContent = result.display_name;
+                div.addEventListener('click', () => selectAddress(result));
+                searchResults.appendChild(div);
+            });
+        }
+        
+        searchResults.style.display = 'block';
+    }
+
+    function selectAddress(address) {
+        console.log('Indirizzo selezionato:', address);  // Debug log
+        
+        // Mappa dei campi del form
+        const formFields = {
+            'osm_road': address.road,
+            'osm_house_number': address.house_number,
+            'osm_house_number_dev': address.house_number_dev,
+            'osm_postcode': address.postcode,
+            'osm_suburb': address.suburb,
+            'osm_city': address.city,
+            'osm_type': address.type,
+            'osm_lat': address.lat,
+            'osm_lon': address.lon
+        };
+
+        console.log('Form fields to update:', formFields);  // Debug log
+
+        // Aggiorna ogni campo del form
+        Object.entries(formFields).forEach(([fieldName, value]) => {
+            const input = document.querySelector(`[name="${fieldName}"]`);
+            if (input) {
+                input.value = value || '';
+                console.log(`Updated ${fieldName} with value:`, value);  // Debug log
+            } else {
+                console.warn(`Field ${fieldName} not found in form`);  // Debug log
+            }
+        });
+        
+        // Mostra l'indirizzo selezionato
+        selectedAddress.innerHTML = `
+            <strong>Indirizzo selezionato:</strong><br>
+            ${address.display_name}
+        `;
+        selectedAddress.style.display = 'block';
+        
+        // Salva i dati completi dell'indirizzo
+        document.querySelector('[name="selected_address"]').value = JSON.stringify(address);
+        console.log('Saved address data to hidden field');  // Debug log
+        
+        // Nascondi i risultati della ricerca
+        searchResults.style.display = 'none';
+        
+        // Abilita il pulsante di salvataggio
+        submitBtn.disabled = false;
+    }
+
+    function showError(message) {
+        searchResults.innerHTML = `<div class="search-result-item text-danger">${message}</div>`;
+        searchResults.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

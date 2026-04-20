@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}AmaldiStoria — Immagini{% endblock %}
+
+{% block app_content %}
+<div class="page-banner">
+  <div class="page-banner-inner text-center">
+    <span class="section-label mb-2 d-block">Archivio fotografico</span>
+    <h1>Immagini</h1>
+    <p class="lead">I fondi fotografici del Centro di Documentazione</p>
+  </div>
+</div>
+
+<h2 class="mb-4">I protagonisti</h2>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card overflow-hidden">
+      <img src="/static/img/archive/giulia.jpg" class="img-fluid" alt="Giulia Zitelli Conti">
+      <div class="card-body py-2 px-3">
+        <p class="mb-0" style="font-size:.8rem;color:var(--c-muted);">PCTO 2021-2022: Giulia Zitelli Conti</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card overflow-hidden h-100">
+      <img src="/static/img/archive/A21.webp" class="img-fluid" alt="">
+      <div class="card-body py-2 px-3">
+        <p class="mb-0" style="font-size:.8rem;color:var(--c-muted);">&copy; IIS E. Amaldi</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-5">
+  <div class="col-md-6">
+    <div class="card overflow-hidden">
+      <img src="/static/img/archive/A18.webp" class="img-fluid" alt="">
+      <div class="card-body py-2 px-3">
+        <p class="mb-0" style="font-size:.8rem;color:var(--c-muted);">&copy; IIS E. Amaldi</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card overflow-hidden">
+      <img src="/static/img/archive/A21.webp" class="img-fluid" alt="">
+      <div class="card-body py-2 px-3">
+        <p class="mb-0" style="font-size:.8rem;color:var(--c-muted);">&copy; IIS E. Amaldi</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr style="border-color:var(--c-border-lt);" class="mb-5">
+
+<h2 class="mb-4">I fondi archivistici</h2>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <h3>1. Il fondo IIS E. Amaldi</h3>
+    <p class="prose">Materiali fotografici e documentali conservati dall'istituto scolastico.</p>
+  </div>
+  <div class="col-md-6">
+    <h3>2. Il Fondo Ilaria De Santis</h3>
+    <p class="prose">
+      Le fotografie contenute in questo fondo appartengono a Ilaria De Santis,
+      ex studentessa dell'Amaldi che ha frequentato il liceo tra il 1988 ed il 1993.
+    </p>
+    <p class="prose">
+      Le immagini sono state acquisite nel corso di un'intervista a Ilaria De Santis
+      e Maria Gimelli, registrata dalle studentesse e dagli studenti del PCTO il 1° giugno 2023.
+    </p>
+    <p class="prose">
+      Il fondo è composto da 68 fotografie, scattate a scuola o durante una gita ad
+      Ercolano, Paestum e Capri nell'a.s. 1988-89.
+    </p>
+  </div>
+</div>
+{% endblock %}

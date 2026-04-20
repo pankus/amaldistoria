@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<div class="page-banner">
+  <div class="page-banner-inner">
+    <span class="section-label mb-2 d-block">Mappe</span>
+    <h1>Distribuzione iscritti</h1>
+    <p class="lead">Localizzazione geografica degli iscritti per anno scolastico</p>
+  </div>
+</div>
+
+<div class="row g-4 align-items-start">
+
+  {# ==================== SIDEBAR ==================== #}
+  <div class="col-lg-3">
+    <div class="map-sidebar sticky-top" style="top:76px;">
+
+      <p class="section-label mb-3">Anno scolastico</p>
+
+      <form method="post" id="filter-form">
+        <div class="mb-4">
+          <label for="selanno" class="form-label">Seleziona anno</label>
+          <select class="form-select form-select-sm" id="selanno" name="anno"
+                  onchange="this.form.submit()">
+            {% for val in params|reverse %}
+              <option value="{{ val }}" {% if val == param %}selected{% endif %}>{{ val }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+
+      <div class="mb-3">
+        <div class="stat-badge w-100 text-center">
+          <span class="stat-value">{{ address_nr }}</span>
+          <span class="stat-label">Localizzati</span>
+        </div>
+        <div class="text-center mt-1" style="font-size:.75rem;color:var(--c-muted);">
+          su {{ studenti_nr }} iscritti totali
+        </div>
+      </div>
+
+      <div class="stat-badge w-100 text-center mb-1">
+        <span class="stat-value">{{ dist_media[0][0]|round|int }}</span>
+        <span class="stat-label">Distanza media (m)</span>
+      </div>
+      <div class="text-center" style="font-size:.75rem;color:var(--c-muted);">
+        casa–scuola (mediana)
+      </div>
+
+      <hr style="border-color:var(--c-border-lt);margin:1.25rem 0;">
+
+      {# Layer toggle #}
+      <p class="section-label mb-2">Layer</p>
+      <div class="d-flex flex-column gap-2 mb-3" id="layer-controls">
+        <label class="layer-toggle-row">
+          <input type="checkbox" id="toggle-heat" checked>
+          <span class="layer-dot" style="background:#e8571a;"></span>
+          Heat map
+        </label>
+        <label class="layer-toggle-row">
+          <input type="checkbox" id="toggle-cluster">
+          <span class="layer-dot" style="background:#3186cc;"></span>
+          Dati raggruppati
+        </label>
+        <label class="layer-toggle-row">
+          <input type="checkbox" id="toggle-school" checked>
+          <span class="layer-dot" style="background:#a61717;border-radius:2px;"></span>
+          Scuola / Succursali
+        </label>
+      </div>
+
+      {# Basemap #}
+      <p class="section-label mb-2">Basemap</p>
+      <div class="d-flex flex-column gap-1">
+        <label class="layer-toggle-row">
+            <input type="radio" name="basemap" value="osm" checked> OpenStreetMap
+        </label>
+        <label class="layer-toggle-row">
+          <input type="radio" name="basemap" value="carto-light"> Carto Positron
+        </label>
+        <label class="layer-toggle-row">
+          <input type="radio" name="basemap" value="carto-dark"> Carto Dark
+        </label>
+      </div>
+
+      <hr style="border-color:var(--c-border-lt);margin:1.25rem 0;">
+
+      <p class="section-label mb-1" style="font-size:.65rem;">Anno selezionato</p>
+      <p style="font-family:var(--font-mono);font-size:.88rem;font-weight:500;
+                color:var(--c-ink);margin:0;">{{ param }}</p>
+
+    </div>
+  </div>
+
+  {# ==================== MAPPA ==================== #}
+  <div class="col-lg-9">
+    <div id="map-studenti" style="height:560px;width:100%;border-radius:var(--radius-md);border:1px solid var(--c-border-lt);box-shadow:var(--shadow);"></div>
+    <div class="map-info-box d-flex align-items-center gap-3 flex-wrap mt-2">
+      <span class="section-label me-1" style="white-space:nowrap;">Layer</span>
+      <ul class="layer-legend mb-0">
+        <li><span class="layer-dot" style="background:#e8571a;"></span>Heat map</li>
+        <li><span class="layer-dot" style="background:#3186cc;"></span>Dati raggruppati</li>
+        <li><span class="layer-dot" style="background:#a61717;border-radius:2px;"></span>Liceo Amaldi</li>
+        <li><span class="layer-dot" style="background:#5b8fa8;border-radius:2px;"></span>Succursali</li>
+      </ul>
+      <span class="ms-auto" style="font-size:.72rem;color:var(--c-muted);">
+        © <a href="https://www.openstreetmap.org/copyright" target="_blank" style="color:inherit;">OpenStreetMap</a>
+        contributors © <a href="https://carto.com/attributions" target="_blank" style="color:inherit;">CARTO</a>
+      </span>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<style>
+.layer-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .82rem;
+  color: var(--c-ink-2);
+  cursor: pointer;
+  user-select: none;
+}
+.layer-toggle-row input { cursor: pointer; accent-color: var(--c-accent); }
+
+/* Cluster style override */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background-clip: padding-box;
+}
+.marker-cluster-small  { background-color: rgba(49,134,204,.35); }
+.marker-cluster-small div  { background-color: rgba(49,134,204,.7); color:#fff; font-family:var(--font-sans); font-size:11px; font-weight:600; }
+.marker-cluster-medium { background-color: rgba(49,134,204,.45); }
+.marker-cluster-medium div { background-color: rgba(49,134,204,.8); color:#fff; font-family:var(--font-sans); font-size:11px; font-weight:600; }
+.marker-cluster-large  { background-color: rgba(207,63,2,.35); }
+.marker-cluster-large div  { background-color: rgba(207,63,2,.8);  color:#fff; font-family:var(--font-sans); font-size:11px; font-weight:600; }
+</style>
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+<script>
+(function () {
+  /* ---- Dati dal server ---- */
+  var HEAT_DATA     = {{ (heat_data if heat_data is defined else [])|tojson }};
+  var CLUSTER_DATA  = {{ (cluster_data if cluster_data is defined else [])|tojson }};
+  var SCHOOL_DATA   = {{ (school_markers if school_markers is defined else [])|tojson }};
+
+  /* ---- Basemap tiles ---- */
+  var TILES = {
+    'osm': L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      { maxZoom: 19, subdomains: 'abcd' }
+    ),
+    'carto-dark': L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+      { maxZoom: 19, subdomains: 'abcd' }
+    ),
+    'osm': L.tileLayer(
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      { maxZoom: 19 }
+    )
+  };
+
+  /* ---- Mappa ---- */
+  var map = L.map('map-studenti', {
+    center: [41.875696, 12.622261],
+    zoom: 12,
+    zoomControl: true,
+    scrollWheelZoom: true
+  });
+  setTimeout(function () { map.invalidateSize(); }, 200);
+
+  var currentTile = TILES['osm'].addTo(map);
+
+  /* ---- Heat layer ---- */
+  var heatLayer = L.heatLayer(HEAT_DATA, {
+    radius: 20,
+    blur: 18,
+    minOpacity: 0.4,
+    // gradient: { 0.2: '#3b82f6', 0.5: '#f59e0b', 0.8: '#ef4444', 1.0: '#7f1d1d' }
+  }).addTo(map);
+
+  /* ---- Cluster layer ---- */
+  var clusterGroup = L.markerClusterGroup({ showCoverageOnHover: false });
+  CLUSTER_DATA.forEach(function(p) {
+    var circle = L.circleMarker([p.lat, p.lon], {
+      radius: 5,
+      color: '#3186cc',
+      fillColor: '#3186cc',
+      fillOpacity: 0.8,
+      weight: 1
+    }).bindPopup(p.road || '');
+    clusterGroup.addLayer(circle);
+  });
+  /* Cluster non visibile di default */
+
+  /* ---- Marker scuola / succursali ---- */
+  var schoolGroup = L.layerGroup();
+
+  function createPermanentLabel(text, color) {
+    return L.divIcon({
+      className: 'permanent-label',
+      html: '<div style="display:flex; align-items:center; gap:4px;">' +
+              '<div style="width:14px;height:14px;background:' + color +
+              ';border:2px solid #fff;border-radius:3px;box-shadow:0 1px 4px rgba(0,0,0,.4);"></div>' +
+              '<span style="background:' + color + '; color:white; padding:2px 8px; ' +
+              'border-radius:12px; font-size:11px; font-weight:600; ' +
+              'white-space:nowrap; box-shadow:0 1px 4px rgba(0,0,0,0.3); ' +
+              'border:1px solid white;">' + text + '</span>' +
+            '</div>',
+      iconSize: [null, null],
+      iconAnchor: [0, 0],
+      popupAnchor: [0, -18]
+    });
+  }
+
+  SCHOOL_DATA.forEach(function(m) {
+    var labelIcon = createPermanentLabel(m.name || 'Liceo Amaldi', m.color || '#a61717');
+    L.marker([m.lat, m.lon], { icon: labelIcon })
+      .bindPopup(m.popup || m.name || 'Liceo Scientifico Statale "E. Amaldi"')
+      .addTo(schoolGroup);
+  });
+  schoolGroup.addTo(map);
+
+  /* ---- Controlli sidebar ---- */
+  document.getElementById('toggle-heat').addEventListener('change', function() {
+    this.checked ? heatLayer.addTo(map) : map.removeLayer(heatLayer);
+  });
+
+  document.getElementById('toggle-cluster').addEventListener('change', function() {
+    this.checked ? clusterGroup.addTo(map) : map.removeLayer(clusterGroup);
+  });
+
+  document.getElementById('toggle-school').addEventListener('change', function() {
+    this.checked ? schoolGroup.addTo(map) : map.removeLayer(schoolGroup);
+  });
+
+  document.querySelectorAll('input[name="basemap"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      map.removeLayer(currentTile);
+      currentTile = TILES[this.value].addTo(map);
+    });
+  });
+
+  /* ---- Scale control ---- */
+  L.control.scale({ imperial: false, metric: true }).addTo(map);
+
+})();
+</script>
+{% endblock %}
