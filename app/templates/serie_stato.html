@@ -1,0 +1,463 @@
+{% extends "base.html" %}
+
+
+{% block app_content %}
+<div class="page-banner">
+  <div class="page-banner-inner">
+    <span class="section-label mb-2 d-block">Dati</span>
+    <h1>Abbandoni e trasferimenti</h1>
+    <p class="lead">Dati su abbandoni e trasferimenti per anno</p>
+  </div>
+</div>
+
+
+
+<div class="row">
+
+  <div class="col-sm-12">
+
+    <figure class="highcharts-figure mb-5">
+      <div id="chart_indirizzo"></div>
+      <!-- <p class="highcharts-description">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur
+      </p> -->
+    </figure>
+
+    <figure class="highcharts-figure mb-5">
+      <div id="chart_indirizzo2"></div>
+      <div id="chart_indirizzo3"></div>
+      <div id="chart_indirizzo4"></div>
+      <!-- <p class="highcharts-description">
+        {# Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur #}
+      </p> -->
+    </figure>
+
+    <figure class="highcharts-figure mb-5">
+      <div id="chart_5"></div>
+      <!-- <p class="highcharts-description">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <code>quis nostrud</code> exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur
+      </p> -->
+    </figure>
+
+  </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+{# <script src="{{ url_for('static', filename='js/highcharts.js') }}"></script> #}
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<script type='text/javascript'>
+$(document).ready(function(){
+
+  Highcharts.setOptions({
+    xAxis: {
+      labels: {
+        y: 35 // Imposta la distanza globale tra le etichette e l'asse x
+      }
+    }
+  });
+
+  let chart1 = Highcharts.chart('chart_indirizzo', {
+
+    chart: {
+      type: 'column'
+    },
+
+    title: {
+      text: 'Abbandono scolastico e trasferimenti'
+    },
+
+    subtitle: {
+      text: 'Fonte: Liceo Amaldi'
+    },
+
+    xAxis: {
+      categories: {{ stato_data.anni|list|safe }},
+      labels: {
+        step: 2,
+        rotation: -45,
+      },
+      plotBands: [{{plotbands|safe}}]
+    },
+
+    yAxis: {
+      min: 0,
+      title: {
+          text: 'Numero di iscritti'
+      },
+      // opposite: true
+    },
+
+    legend: {
+      reversed: true
+    },
+
+    tooltip: {
+      shared: true
+    },
+
+    plotOptions: {
+      series: {
+          stacking: 'normal'
+      }
+      // column: {
+      //     stacking: 'normal'
+      // }
+    },
+
+    series: [{
+      name: 'Frequenza',
+      data: {{ stato_data.frequenta|list|safe }},
+    }, {
+      name: 'Abbandono',
+      data: {{ stato_data.abbandona|list|safe }},
+    }, {
+      name: 'Trasferimento',
+      data: {{ stato_data.trasferito|list|safe }},
+    }]
+  });
+
+
+  let chart2 = Highcharts.chart('chart_indirizzo2', {
+
+    chart: {
+      type: 'column'
+    },
+
+    title: {
+      text: 'Scientifico'
+    },
+
+    xAxis: {
+      categories: {{ stato_indirizzo_data.anni|list|safe }},
+      labels: {
+        step: 2,
+        rotation: -45,
+      },
+      plotBands: [{{plotbands|safe}}]
+    },
+
+    yAxis: {
+      min: 0,
+      title: {
+          text: 'Numero iscritti'
+      },
+    },
+
+    legend: {
+      reversed: true,
+      align: 'right',
+      verticalAlign: 'top',
+    },
+
+    tooltip: {
+      shared: true
+    },
+
+    plotOptions: {
+      series: {
+          stacking: 'normal'
+      }
+    },
+
+    series: [{
+      name: 'Frequenza',
+      data: {{ stato_indirizzo_data.frequenta_scie|list|safe }}
+    }, {
+      name: 'Abbandono',
+      data: {{ stato_indirizzo_data.abbandona_scie|list|safe }}
+    }, {
+      name: 'Trasferimento',
+      data: {{ stato_indirizzo_data.trasferito_scie|list|safe }}
+    }]
+  });
+
+
+  let chart3 = Highcharts.chart('chart_indirizzo3', {
+
+    chart: {
+      type: 'column'
+    },
+
+    title: {
+      text: 'Classico'
+    },
+
+    xAxis: {
+      categories: {{ stato_indirizzo_data.anni|list|safe }},
+      labels: {
+        step: 2,
+        rotation: -45,
+      },
+      plotBands: [{{plotbands|safe}}]
+    },
+
+    yAxis: {
+      min: 0,
+      title: {
+          text: 'Numero iscritti'
+      },
+      // opposite: true
+    },
+
+    legend: {
+      reversed: true,
+      align: 'right',
+      verticalAlign: 'top',
+    },
+
+    tooltip: {
+      shared: true
+    },
+
+    plotOptions: {
+      series: {
+          stacking: 'normal'
+      }
+    },
+
+    series: [{
+      name: 'Frequenza',
+      data: {{ stato_indirizzo_data.frequenta_clas|list|safe }}
+    }, {
+      name: 'Abbandono',
+      data: {{ stato_indirizzo_data.abbandona_clas|list|safe }}
+    }, {
+      name: 'Trasferimento',
+      data: {{ stato_indirizzo_data.trasferito_clas|list|safe }}
+    }]
+  });
+
+
+  let chart4 = Highcharts.chart('chart_indirizzo4', {
+
+    chart: {
+      type: 'column'
+    },
+
+    title: {
+      text: 'Linguistico'
+    },
+
+    xAxis: {
+      categories: {{ stato_indirizzo_data.anni|list|safe }},
+      labels: {
+        step: 2,
+        rotation: -45,
+      },
+      plotBands: [{{plotbands|safe}}]
+    },
+
+    yAxis: {
+      min: 0,
+      title: {
+          text: 'Numero iscritti'
+      },
+    },
+
+    legend: {
+      reversed: true,
+      align: 'right',
+      verticalAlign: 'top',
+    },
+
+    tooltip: {
+      shared: true
+    },
+
+    plotOptions: {
+      series: {
+          stacking: 'normal'
+      }
+    },
+
+    series: [{
+      name: 'Frequenza',
+      data: {{ stato_indirizzo_data.frequenta_ling|list|safe }}
+    }, {
+      name: 'Abbandono',
+      data: {{ stato_indirizzo_data.abbandona_ling|list|safe }}
+    }, {
+      name: 'Trasferimento',
+      data: {{ stato_indirizzo_data.trasferito_ling|list|safe }}
+    }]
+  });
+
+
+  let chart5 = Highcharts.chart('chart_5', {
+
+    chart: {
+      type: 'column'
+    },
+
+    title: {
+      text: 'Percentuali abbandoni e trasferimenti (per nazionalità)'
+    },
+
+    xAxis: {
+      categories: {{ stato_nation.anni|list|safe }},
+      labels: {
+        step: 2,
+        rotation: -45,
+      }
+    },
+
+    yAxis: {
+      min: 0,
+      title: {
+          text: 'Percentuali'
+      },
+      labels: {
+        format: '{value} %'
+      }
+    },
+
+    legend: {
+      // reversed: true,
+      align: 'right',
+      verticalAlign: 'top',
+    },
+
+    tooltip: {
+      shared: true
+    },
+
+    plotOptions: {
+      series: {
+          stacking: 'percent'
+      }
+    },
+
+    series: [{
+      name: 'Ita',
+      data: {{ stato_nation.ita|list|safe }},
+      stack: 'nation'
+    }, {
+      name: 'Str',
+      data: {{ stato_nation.noita|list|safe }},
+      stack: 'nation'
+    }, {
+      name: 'Abbandono (ita)',
+      data: {{ stato_nation.abb_ita|list|safe }},
+      stack: 'abbandono'
+    }, {
+      name: 'Abbandono (str)',
+      data: {{ stato_nation.abb_no_ita|list|safe }},
+      stack: 'abbandono'
+    }, {
+      name: 'Trasferimento (ita)',
+      data: {{ stato_nation.tra_ita|list|safe }},
+      stack: 'trasferimento',
+      visible: false
+    }, {
+      name: 'Trasferimento (str)',
+      data: {{ stato_nation.tra_no_ita|list|safe }},
+      stack: 'trasferimento',
+      visible: false
+    }]
+  });
+
+
+});
+</script>
+{% endblock %}
+
+
+{% block styles %}
+
+  <style type="text/css">
+    .highcharts-figure,
+    .highcharts-data-table table {
+        min-width: 360px;
+        /*max-width: 800px;*/
+        margin: 1em auto;
+    }
+
+    .highcharts-data-table table {
+        /*font-family: Verdana, sans-serif;*/
+        border-collapse: collapse;
+        border: 1px solid #ebebeb;
+        margin: 10px auto;
+        text-align: center;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .highcharts-data-table caption {
+        padding: 1em 0;
+        font-size: 1.2em;
+        color: #555;
+    }
+
+    .highcharts-data-table th {
+        font-weight: 600;
+        padding: 0.5em;
+    }
+
+    .highcharts-data-table td,
+    .highcharts-data-table th,
+    .highcharts-data-table caption {
+        padding: 0.5em;
+    }
+
+    .highcharts-data-table thead tr,
+    .highcharts-data-table tr:nth-child(even) {
+        background: #f8f8f8;
+    }
+
+    .highcharts-data-table tr:hover {
+        background: #f1f7ff;
+    }
+
+    /* Titoli grafici in evidenza */
+    .highcharts-title {
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      color: #cf3f02 !important;
+      background: #f9fafb;
+      padding: 12px 15px !important;
+      border-radius: 8px;
+      margin-bottom: 15px !important;
+      display: inline-block;
+      width: auto;
+      border-left: 4px solid #cf3f02;
+    }
+
+    .highcharts-title tspan {
+      fill: #cf3f02 !important;
+      font-weight: 700 !important;
+    }
+
+    .highcharts-subtitle {
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      fill: #667085 !important;
+    }
+
+    /* Contenitore grafico con bordo e ombra */
+    .highcharts-figure {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 35px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      /*border: 1px solid #e4e7ec;*/
+      transition: all 0.3s ease;
+    }
+
+    .highcharts-figure:hover {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-color: #cf3f02;
+    }
+  </style>
+{% endblock %}

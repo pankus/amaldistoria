@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pageCarousel %}
+
+{% block title %}AmaldiStoria — Immagini{% endblock %}
+
+{% block app_banner %}
+  {{ pageCarousel('Immagini', 'img/banner_a.jpg') }}
+{% endblock %}
+
+{% block app_content %}
+
+  <h2 class="mb-4">I protagonisti</h2>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <img src="/static/img/archive/giulia.jpg"
+           class="img-fluid rounded" alt="PCTO 2021-2022: Giulia Zitelli Conti">
+      <p class="text-muted small mt-1">PCTO 2021-2022: Giulia Zitelli Conti</p>
+    </div>
+    <div class="col-md-8">
+      <img src="/static/img/archive/A21.webp"
+           class="img-fluid rounded" alt="">
+      <p class="text-muted small mt-1">&copy; IIS E. Amaldi</p>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-5">
+    <div class="col-md-6">
+      <img src="/static/img/archive/A18.webp"
+           class="img-fluid rounded" alt="">
+      <p class="text-muted small mt-1">&copy; IIS E. Amaldi</p>
+    </div>
+    <div class="col-md-6">
+      <img src="/static/img/archive/A21.webp"
+           class="img-fluid rounded" alt="">
+      <p class="text-muted small mt-1">&copy; IIS E. Amaldi</p>
+    </div>
+  </div>
+
+  <h2 class="mb-4">I fondi archivistici</h2>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <h3>1. Il fondo IIS E. Amaldi</h3>
+    </div>
+    <div class="col-md-6">
+      <h3>2. Il Fondo Ilaria De Santis</h3>
+      <p class="prose">
+        Le fotografie contenute in questo fondo appartengono a Ilaria De Santis,
+        ex studentessa dell'Amaldi che ha frequentato il liceo tra il 1988 ed il 1993.
+      </p>
+      <p class="prose">
+        Le immagini sono state acquisite nel corso di un'intervista a Ilaria De Santis
+        e Maria Gimelli, anch'essa ex alunna dell'Amaldi, registrata dalle studentesse
+        e dagli studenti del PCTO il 1° giugno 2023.
+      </p>
+      <p class="prose">
+        Il fondo è composto da 68 fotografie, scattate a scuola o durante una gita ad
+        Ercolano, Paestum e Capri nell'a.s. 1988-89. Laddove presenti, sono state
+        riportate le didascalie scritte a mano sul retro delle stampe per una maggiore
+        contestualizzazione.
+      </p>
+    </div>
+  </div>
+
+{% endblock %}

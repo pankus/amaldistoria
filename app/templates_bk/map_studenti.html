@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+
+{% block app_content %}
+	<div class="row">
+    <div class="col-md-12">
+      <h2 class="page-title h2-step">Mappa interattiva sulla localizzazione degli iscritti alla scuola</h2>
+    </div>
+  </div>
+
+	<div class="row">
+    <div class="col-sm-4">
+      <form class="form-inline" method="post">
+        <div class="form-group">
+          <label for="selanno" class="main-selector-label">Anno scolastico</label>
+          <select class="form-control" id="selanno" name="anno" onchange="this.form.submit()">
+          	{% for param in params|reverse %}
+          	  {% if param == request.anno %}
+          	  <option value="{{param}}" selected> {{param}} </option>
+          	  {% else %}
+          	  <option value="{{param}}"> {{param}} </option>
+          	  {% endif %}
+          	{% endfor %}
+          </select>
+          <p class="help-block"><small>[ selezionare un anno scolastico ]</small></p>
+        </div>
+      </form>
+    </div>
+
+     <div class="col-sm-8">
+     	<button class="btn btn-primary" type="button">
+ 			  mumero iscritti localizzati &nbsp;&nbsp;<span class="badge">{{ address_nr }} su {{studenti_nr}}</span>
+ 			</button>
+       
+       <button class="btn btn-success pull-right" type="button">
+        distanza media casa-scuola (in metri): &nbsp;&nbsp;<span class="badge">{{ dist_media[0][0]|round }}</span>
+      </button>
+     	
+      <!-- <span class="pull-right">Anno Scolastico <strong> {{ param }} </strong> 
+     	  distanza media casa-scuola: {{ dist_media[0][0]|round }} metri)
+      </span> -->
+    </div>
+  </div>
+
+  <div class="row">
+  	<div class="col-sm-12 map_container">
+  		<div id="map">
+  			{{ folium_map._repr_html_()|safe }}
+  		</div>
+  	</div>
+  </div>
+
+{% endblock %}

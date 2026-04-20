@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AmaldiStoria — Centro di Documentazione del Liceo Amaldi di Roma">
+
+  <title>{% block title %}AmaldiStoria{% endblock %}</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- Font Awesome (mantenuto per i marker Folium) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- CSS applicazione -->
+  <link href="{{ url_for('static', filename='css/assets/amaldi.css') }}" rel="stylesheet">
+
+  {% block styles %}{% endblock %}
+</head>
+
+<body>
+
+  <!-- ===================== NAVBAR ===================== -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+
+      <a class="navbar-brand" href="{{ url_for('main.index') }}">
+        AmaldiStoria
+        <small>CNR — ISMed</small>
+      </a>
+
+      <button class="navbar-toggler" type="button"
+              data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+              aria-controls="mainNavbar" aria-expanded="false"
+              aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNavbar">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+          <li class="nav-item" id="nav-presentazione">
+            <a class="nav-link" id="presentazione" href="{{ url_for('main.presentazione') }}">Presentazione</a>
+          </li>
+
+          <li class="nav-item dropdown" id="nav-dati">
+            <a class="nav-link dropdown-toggle" href="#"
+               data-bs-toggle="dropdown" aria-expanded="false">Dati</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" id="serie_generale" href="{{ url_for('main.serie_generale') }}">Generale</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">Dettaglio</h6></li>
+              <li><a class="dropdown-item" id="serie_indirizzo" href="{{ url_for('main.serie_indirizzo') }}">Indirizzo di studi</a></li>
+              <li><a class="dropdown-item" id="serie_stato" href="{{ url_for('main.serie_stato') }}">Abbandoni e trasferimenti</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown" id="nav-mappe">
+            <a class="nav-link dropdown-toggle" href="#"
+               data-bs-toggle="dropdown" aria-expanded="false">Mappe</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" id="mapdata" href="{{ url_for('main.mapdata') }}">Distribuzione iscritti</a></li>
+              <li><a class="dropdown-item" id="mapdata_time" href="{{ url_for('main.mapdata_time') }}">Distribuzione nel tempo</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">Dettaglio</h6></li>
+              <li><a class="dropdown-item" id="map_graph" href="{{ url_for('main.map_graph') }}">Statistiche per anno</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">Territorio</h6></li>
+              <li><a class="dropdown-item" id="map_gloglo" href="{{ url_for('main.map_gloglo') }}">Il territorio</a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item" id="nav-immagini">
+            <a class="nav-link" id="immagini" href="{{ url_for('main.immagini') }}">Immagini</a>
+          </li>
+
+          <li class="nav-item" id="nav-voci">
+            <a class="nav-link" id="voci" href="{{ url_for('main.voci') }}">Voci</a>
+          </li>
+
+        </ul>
+
+        <!-- Auth -->
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          {% if current_user.is_authenticated %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="{{ url_for('static', filename='img/user.jpg') }}"
+                   class="user-image" alt="User">
+              <span class="ms-1">{{ current_user.username }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <div class="px-3 py-2">
+                  <div style="font-family:var(--font-ui);font-size:.85rem;color:rgba(255,255,255,.85);font-weight:600;">
+                    {{ current_user.name }}
+                  </div>
+                  <div style="font-family:var(--font-ui);font-size:.75rem;color:rgba(255,255,255,.45);">
+                    {{ current_user.email }}
+                  </div>
+                </div>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              {% if current_user.role in ['adm', 'adv'] %}
+              <li><a class="dropdown-item" href="/admin"><i class="bi bi-gear me-2"></i>Admin panel</a></li>
+              {% endif %}
+              <li>
+                <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                  <i class="bi bi-box-arrow-right me-2"></i>Logout
+                </a>
+              </li>
+            </ul>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('auth.login') }}">
+              <i class="bi bi-person me-1"></i>Login
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container -->
+  </nav>
+  <!-- ===================== END NAVBAR ===================== -->
+
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  {% block app_banner %}{% endblock %}
+
+  {% if request.path in ['/', '/index'] %}
+    {% from "_macros.html" import mainCarousel %}
+    {{ mainCarousel() }}
+  {% endif %}
+
+  <main>
+    <div class="container my-4">
+      {# Flash messages #}
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block app_content %}{% endblock %}
+    </div>
+  </main>
+  <!-- ===================== END MAIN CONTENT ===================== -->
+
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row g-4">
+
+        <div class="col-md-4">
+          <p class="footer-heading">Istituto</p>
+          <a href="https://www.ismed.cnr.it" target="_blank">
+            <img src="{{ url_for('static', filename='img/logos/ismed_mod.png') }}"
+                 class="footer-logo mb-3" alt="CNR ISMed">
+          </a>
+          <p class="footer-prose">
+            <a href="https://www.ismed.cnr.it" target="_blank">
+              CNR — Istituto di Studi sul Mediterraneo
+            </a>
+          </p>
+        </div>
+
+        <div class="col-md-4">
+          <p class="footer-heading">Contatti</p>
+          <p class="footer-prose">
+            <i class="bi bi-geo-alt"></i>
+            <a href="https://goo.gl/maps/EM2nuBG87s6H7MT2A" target="_blank">
+              Via Gerolamo Cardano, 135 — Roma
+            </a>
+          </p>
+          <p class="footer-prose">
+            <i class="bi bi-envelope"></i>
+            <a href="mailto:francesco.difilippo@ismed.cnr.it">
+              francesco.difilippo@ismed.cnr.it
+            </a>
+          </p>
+        </div>
+
+        <div class="col-md-4">
+          <p class="footer-heading">Progetto</p>
+          <p class="footer-prose">
+            AmaldiStoria è un progetto del
+            <a href="https://www.liceo-amaldi.edu.it/" target="_blank">Liceo Amaldi di Roma</a>
+            e del
+            <a href="https://www.ismed.cnr.it" target="_blank">CNR — ISMed</a>,
+            realizzato nell'ambito delle attività del
+            <a href="http://mdhlab.cnr.it/" target="_blank">MDHLab</a>.
+          </p>
+        </div>
+
+      </div><!-- /.row -->
+
+      <hr class="footer-divider">
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center footer-bottom">
+        <span>
+          &copy; {{ moment().format('YYYY') }}
+          <a href="http://mdhlab.cnr.it/" target="_blank">MDHLab | CNR — ISMed</a>
+        </span>
+        <span>
+          <a href="{{ url_for('main.presentazione') }}">Presentazione</a>
+        </span>
+      </div>
+
+    </div><!-- /.container -->
+  </footer>
+  <!-- ===================== END FOOTER ===================== -->
+
+
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Moment (Flask-Moment) -->
+  {{ moment.include_moment() }}
+
+  <!-- Active nav link -->
+  <script>
+    (function () {
+      const endpoint = '{{ request.endpoint }}';
+      const el = document.getElementById(endpoint);
+      if (el) {
+        el.classList.add('active');
+        const parentLi = el.closest('.nav-item');
+        if (parentLi) parentLi.classList.add('active');
+        // evidenzia anche il dropdown padre
+        const dropdownParent = el.closest('.dropdown');
+        if (dropdownParent) dropdownParent.classList.add('active');
+      }
+    })();
+  </script>
+
+  <!-- Matomo -->
+  <script>
+    var _paq = window._paq = window._paq || [];
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function () {
+      var u = "//metrics.cedrc.cnr.it/";
+      _paq.push(['setTrackerUrl', u + 'matomo.php']);
+      _paq.push(['setSiteId', '50']);
+      var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+      g.async = true; g.src = u + 'matomo.js'; s.parentNode.insertBefore(g, s);
+    })();
+  </script>
+
+  {% block scripts %}{% endblock %}
+
+</body>
+</html>

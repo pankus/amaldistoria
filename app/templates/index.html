@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+
+{# ============================================================
+   HERO
+   ============================================================ #}
+<section class="home-hero">
+  <div class="container home-hero-inner">
+    <div class="row align-items-center g-5">
+
+      {# Testo hero #}
+      <div class="col-lg-7">
+        <div class="mb-3">
+          {#<span class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            CNR — Istituto di Studi sul Mediterraneo
+          </span>#}
+        </div>
+        <h1 class="home-hero-title">
+          Centro di<br>
+          Documentazione<br>
+          <span class="under">Liceo Amaldi</span>
+        </h1>
+        <p class="home-hero-lead mt-3">
+          Un progetto di ricerca e didattica sulla storia della scuola<br>
+          e del territorio di Tor Bella Monaca, Roma
+        </p>
+      </div>
+
+      {# Partner box #}
+      <div class="col-lg-5">
+        <div class="home-partner-box">
+          <p class="section-label mb-3">Il progetto è una collaborazione tra</p>
+          <div class="d-flex flex-column gap-3">
+            <div>
+              <a href="https://www.liceo-amaldi.edu.it/" target="_blank"
+                 class="coord-name d-block" style="font-size:.95rem;">
+                Liceo Scientifico Edoardo Amaldi
+              </a>
+              <span class="coord-role">Roma — Tor Bella Monaca</span>
+            </div>
+            <div style="border-top:1px solid var(--c-border-lt);padding-top:.85rem;">
+              <a href="https://www.ismed.cnr.it" target="_blank"
+                 class="coord-name d-block" style="font-size:.95rem;">
+                CNR — Istituto di Studi sul Mediterraneo
+              </a>
+              <span class="coord-role">
+                <a href="http://mdhlab.cnr.it/" target="_blank"
+                   style="color:var(--c-muted);">MDHLab</a>
+                — Via G. Cardano 135, Roma
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+{# ============================================================
+   ESPLORA — navigazione sezioni
+   ============================================================ #}
+<section class="home-section">
+  <div class="container">
+    <span class="home-section-label">Esplora</span>
+    <div class="row g-3">
+
+      <div class="col-md-4">
+        <a href="{{ url_for('main.serie_generale') }}" class="home-nav-card">
+          <div class="home-nav-card-icon">
+            <i class="bi bi-bar-chart-line"></i>
+          </div>
+          <div class="home-nav-card-title">Dati statistici</div>
+          <p class="home-nav-card-desc">
+            Serie storiche sugli iscritti per anno scolastico: genere, nazionalità,
+            indirizzo di studi, abbandoni e trasferimenti dal 1992 ad oggi.
+          </p>
+          <span class="home-nav-card-arrow">
+            Consulta i dati <i class="bi bi-arrow-right"></i>
+          </span>
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <a href="{{ url_for('main.mapdata') }}" class="home-nav-card">
+          <div class="home-nav-card-icon">
+            <i class="bi bi-map"></i>
+          </div>
+          <div class="home-nav-card-title">Mappe interattive</div>
+          <p class="home-nav-card-desc">
+            Distribuzione geografica degli iscritti per anno scolastico,
+            con heatmap, cluster e analisi spaziale del rapporto scuola–territorio.
+          </p>
+          <span class="home-nav-card-arrow">
+            Esplora le mappe <i class="bi bi-arrow-right"></i>
+          </span>
+        </a>
+      </div>
+
+      <div class="col-md-4">
+        <a href="{{ url_for('main.voci') }}" class="home-nav-card">
+          <div class="home-nav-card-icon">
+            <i class="bi bi-mic"></i>
+          </div>
+          <div class="home-nav-card-title">Voci della memoria</div>
+          <p class="home-nav-card-desc">
+            Testimonianze video di docenti ed ex-studenti raccolte nel rispetto
+            delle buone pratiche per la storia orale (AISO).
+          </p>
+          <span class="home-nav-card-arrow">
+            Ascolta le voci <i class="bi bi-arrow-right"></i>
+          </span>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+{# ============================================================
+   DESCRIZIONE — testo a due colonne
+   ============================================================ #}
+<section class="home-section">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-8">
+        <span class="home-section-label">Il progetto</span>
+        <div class="home-text-cols">
+          <p class="dropcap">
+            Il <code>Centro di Documentazione del Liceo Edoardo Amaldi</code> è un progetto
+            nato nel 2021 dalla collaborazione tra l'istituto scolastico e il
+            <a href="https://www.ismed.cnr.it/">CNR - ISMed</a>. L'obiettivo è costruire
+            uno spazio ragionato di raccolta delle fonti orali, statistiche, documentarie
+            e fotografiche che permetta di fare esperienze di ricerca sulla storia del Liceo
+            e della sua relazione con il territorio circostante.
+          </p>
+          <p>
+            Siamo convinti che solo la didattica attiva possa far apprezzare il metodo
+            storico critico, comprendendone le potenzialità anche nella vita di tutti i
+            giorni, in particolare sviluppando competenze relative alla capacità di analisi
+            delle fonti. Farlo sulla storia della propria scuola è, forse, ancora più
+            motivante e interessante, perché mette in prospettiva storica lo spazio che si
+            abita quotidianamente.
+          </p>
+          <p>
+            Lo strumento è pensato sia per la ricerca accademica sia, e soprattutto,
+            per la didattica attiva, con un approccio laboratoriale dove studenti e
+            docenti sperimentano insieme un percorso di ricerca storica sulla propria
+            comunità scolastica.
+          </p>
+          <p>
+            Se il progetto vi interessa, se volete contribuire anche solo dandoci
+            alcune informazioni o fornendoci materiali, non esitate a contattarci.
+          </p>
+        </div>
+      </div>
+
+      {# Immagini archivio #}
+      <div class="col-lg-4 d-none d-lg-flex flex-column gap-2">
+        <div style="border-radius:var(--radius-md);overflow:hidden;flex:1;min-height:0;">
+          <img src="{{ url_for('static', filename='img/archive/A21.webp') }}"
+               class="img-fluid w-100 h-100"
+               style="object-fit:cover;"
+               alt="Archivio fotografico Liceo Amaldi">
+        </div>
+        <div style="border-radius:var(--radius-md);overflow:hidden;height:120px;">
+          <img src="{{ url_for('static', filename='img/archive/giulia.jpg') }}"
+               class="img-fluid w-100 h-100"
+               style="object-fit:cover;object-position:top;"
+               alt="PCTO Giulia Zitelli Conti">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+{# ============================================================
+   COORDINAMENTO
+   ============================================================ #}
+<section class="home-section">
+  <div class="container">
+      <div class="d-flex justify-content-center align-items-center mb-5">
+        <span class="hero-badge">
+          <span class="hero-badge-dot me-2"></span>
+          Coordinamento
+        </span>
+      </div>
+    <div class="row g-4 justify-content-center">
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="coord-group">
+          <span class="coord-group-label">Liceo Amaldi</span>
+          <span class="coord-name">Danilo Corradi</span>
+          <span class="coord-name">Susanna Mattarocci</span>
+          <span class="coord-name">Domenico Zito</span>
+          <span class="coord-name">Maria Rocco</span>
+          <span class="coord-role mt-1">Liceo Amaldi, Roma</span>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="coord-group">
+          <span class="coord-group-label">CNR — ISMed</span>
+          <span class="coord-name">Michele Colucci</span>
+          <span class="coord-name">Francesco Di Filippo</span>
+          <span class="coord-role mt-1">
+            <a href="https://www.ismed.cnr.it/" target="_blank"
+               style="color:var(--c-muted);">CNR - ISMed / MDHLab</a>
+          </span>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="coord-group">
+          <span class="coord-group-label">Realizzazione</span>
+          <span class="coord-name">Giulia Zitelli Conti</span>
+          <span class="coord-role mt-1">Università degli Studi Roma Tre — AISO</span>
+          <span class="coord-name">Alessandro Laruffa</span>
+          <span class="coord-role">Università Ca' Foscari, Venezia</span>
+          <span class="coord-name mt-2">Daniele Napolitano</span>
+          <span class="coord-role">Ricercatore indipendente, videomaker</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+{# ============================================================
+   HANNO LAVORATO CON NOI — accordion
+   ============================================================ #}
+<section class="home-section">
+  <div class="container">
+    <div class="row g-5 align-items-start">
+
+      <div class="col-lg-4">
+        <span class="home-section-label">Partecipanti</span>
+        <h2 class="home-section-title" style="margin-bottom:.75rem;">
+          Hanno lavorato con noi
+        </h2>
+        <p class="prose">
+          Studenti e studentesse del Liceo Amaldi che hanno partecipato
+          alle attività di ricerca e documentazione nell'ambito del
+          progetto PCTO.
+        </p>
+        <p class="prose">
+          <strong style="color:var(--c-ink);">59 studenti</strong>
+          coinvolti in tre anni scolastici.
+        </p>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="accordion students-accordion" id="studentsAccordion">
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#year2324"
+                      aria-expanded="true" aria-controls="year2324">
+                2023–2024
+                <span class="ms-2" style="font-size:.72rem;font-weight:400;
+                      color:var(--c-muted);">17 studenti</span>
+              </button>
+            </h2>
+            <div id="year2324" class="accordion-collapse collapse show"
+                 data-bs-parent="#studentsAccordion">
+              <div class="accordion-body">
+                Matteo Bellucci (5DLT), Sara Brighella (4BC), Siria Cerniglia (4BC),
+                Beatrice Larocca (4BC), Andrea Luongo (4BC), Martina Premutico (4BC),
+                Ilaria Sales (4BC), Lucrezia Sforza (4BC), Valeria Sorbara (4BC),
+                Aurora Vizzari (4BC), Katia Kapinga Ndimba Bilolo (5BL),
+                Marta Catino (5DLT), Leonardo Malafarina (5DLT), Annalisa Mammola (5DLT),
+                Linda Petruccetti (5DLT), Davide Vitagliano (5DLT), Danilo Zollino (5DLT).
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#year2223"
+                      aria-expanded="false" aria-controls="year2223">
+                2022–2023
+                <span class="ms-2" style="font-size:.72rem;font-weight:400;
+                      color:var(--c-muted);">20 studenti</span>
+              </button>
+            </h2>
+            <div id="year2223" class="accordion-collapse collapse"
+                 data-bs-parent="#studentsAccordion">
+              <div class="accordion-body">
+                Nicolò Ferrante (3A), Martina Calandro (3BC), Beatrice Larocca (3BC),
+                Andrea Luongo (3BC), Martina Premutico (3BC), Ilaria Sales (3BC),
+                Lucrezia Sforza (3BC), Valeria Sorbara (3BC), Aurora Vizzari (3BC),
+                Corciu Beatris (3C), Marta Catino (4DLT), Leonardo Malafarina (4DLT),
+                Annalisa Mammola (4DLT), Linda Petruccetti (4DLT), Davide Vitagliano (4DLT),
+                Danilo Zollino (4DLT), Samuel Gnisci (5C), Matteo Farcomeni (5C),
+                Daniele Panella (5C), Valeria Vilona (5C).
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#year2122"
+                      aria-expanded="false" aria-controls="year2122">
+                2021–2022
+                <span class="ms-2" style="font-size:.72rem;font-weight:400;
+                      color:var(--c-muted);">22 studenti</span>
+              </button>
+            </h2>
+            <div id="year2122" class="accordion-collapse collapse"
+                 data-bs-parent="#studentsAccordion">
+              <div class="accordion-body">
+                Silvia Longo (3AS), Chiara Colaianni (3AS), Andrea Moro (3AS),
+                Federico Calcagna (3AS), Luca Ferracuti (3AS), Cecilia Testoni (3AS),
+                Leonardo Malafarina (3DLT), Matteo Bellucci (3DLT),
+                Marialetizia Fiorenza (3DLT), Davide Vitagliano (3DLT),
+                Linda Petruccetti (3DLT), Danilo Zollino (3DLT),
+                Konstantina Sotiropoulos (4AC), Giulia Micheletti (4AC),
+                Melissa Esposito (4ILT), Emanuela Santoni (4C), Niccolò Marino (4C),
+                Fabrizio Saltarello (4C), Dylan Marcelli (4C), Simone Delfini (4C),
+                Andrea Toni (4C), Sonica Osadiaye (4C).
+              </div>
+            </div>
+          </div>
+
+        </div>{# /accordion #}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}

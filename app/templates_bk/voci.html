@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pageCarousel %}
+
+{% block title %}AmaldiStoria — Voci{% endblock %}
+
+{% block app_banner %}
+  {{ pageCarousel('Voci', 'img/carousel/carousel_a.jpg') }}
+{% endblock %}
+
+{% block app_content %}
+
+{# Intro #}
+<div class="row mb-4">
+  <div class="col-12">
+    <p class="prose dropcap">
+      Per valorizzare la <code>storia del Liceo "Amaldi"</code>, sono state raccolte testimonianze di insegnanti,
+      studenti e studentesse che hanno lavorato o frequentato la scuola a partire dalla sua istituzione.
+      Queste <code>"voci della memoria"</code> sono state registrate nel rispetto delle
+      <a target="_blank" href="https://www.aisoitalia.org/buone-pratiche/">buone pratiche per la storia orale</a>
+      dell'Associazione Italiana di Storia Orale per mezzo video e audio.
+      Se ne presenta qui un primo nucleo, che potrà essere ampliato nel prossimo futuro.
+    </p>
+    <p class="prose">
+      Le fonti orali rappresentano documenti preziosi per la loro aderenza alla vita degli uomini e delle donne
+      che attraversano la storia con le loro biografie singole e collettive. Ci narrano aspetti della vita
+      quotidiana difficilmente reperibili in altre tipologie documentarie. Si presentano uniche ed irripetibili
+      poiché costruite nel dialogo tra intervistato ed intervistatore e si è perciò scelto di affidare
+      completamente agli studenti e alle studentesse coinvolti nel progetto le decisioni in merito alle
+      modalità di ripresa e alle domande da porre, con qualche indicazione preliminare volta ad orientarli.
+    </p>
+    <p class="prose">
+      Hanno partecipato al gruppo interviste: Silvia Longo, Chiara Colaianni, Cecilia Testoni,
+      Marialetizia Fiorenza, Linda Petruccetti, Danilo Zollino, Niccolò Marino, coordinati dalla
+      prof.ssa Susanna Mattarocci e dalla dott.ssa Giulia Zitelli Conti.
+    </p>
+  </div>
+</div>
+
+{# Helper macro per le voci #}
+{% macro voce(n, nome, data, descrizione, youtube_id, flip=false) %}
+<hr class="my-4">
+<div class="row align-items-center g-4 featurette">
+  <div class="col-md-7 {% if flip %}order-md-2{% endif %}">
+    <h2 class="featurette-heading" id="{{ n }}">
+      {{ nome }}<br>
+      <span class="text-muted" style="font-size:.75em;font-weight:400;">{{ data }}</span>
+    </h2>
+    {% if descrizione %}
+      <p class="lead prose">{{ descrizione }}</p>
+    {% endif %}
+  </div>
+  <div class="col-md-5 {% if flip %}order-md-1{% endif %}">
+    <div class="ratio ratio-16x9">
+      <iframe src="https://www.youtube.com/embed/{{ youtube_id }}"
+              title="Intervista {{ nome }}"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{{ voce(1, "Prof.ssa Loredana Peruggia", "8 marzo 2022",
+   "L'arrivo a Tor Bella Monaca, la crescita del liceo, il rapporto con gli studenti e i progetti formativi dell'Amaldi dalla sua fondazione ad oggi nelle parole di una docente che ha svolto qui la maggior parte della sua carriera.",
+   "_YnnaWCoWHI") }}
+
+{{ voce(2, "Vice Preside Adelaide Granese", "19 marzo 2022",
+   "Da succursale del Francesco D'Assisi a polo culturale del quartiere: tracce della storia dell'Amaldi nel racconto dell'attuale Vice Preside dell'istituto.",
+   "wQukUD7vqOk", flip=true) }}
+
+{{ voce(3, "Gianluca Mattarocci", "19 marzo 2022",
+   "Dai banchi dell'Amaldi alla cattedra universitaria: l'ex studente Gianluca Mattarocci ricorda gli anni liceali e racconta come abbiano orientato la sua carriera.",
+   "lTdL0PfIqOE") }}
+
+{{ voce(4, "Prof.ssa Francesca De Santis", "29 marzo 2022",
+   "", "oRc6qEZv-Xw", flip=true) }}
+
+{{ voce(5, "Andrea Costantini, Marco Stilo e Annalisa Branetti", "5 aprile 2022",
+   "Tre percorsi di vita diversi, accomunati da un'amicizia di lunga data nata nelle aule dell'Amaldi. I ricordi di tre studenti nati nel 1983.",
+   "bw1d6XhdyvM") }}
+
+{{ voce(6, "Prof. Mirko Rovere", "5 aprile 2022",
+   "Passione per lo sport e fiducia nel rapporto alunno-insegnante: un percorso di studio e lavoro all'interno dell'Amaldi.",
+   "0twgNJboGK8", flip=true) }}
+
+{{ voce(7, "Ilaria De Santis e Maria Gimelli", "1 giugno 2023",
+   "Di nuovo compagne di banco: le memorie condivise di due ex studentesse del liceo (1988–1993).",
+   "EvnNS8tTlhk") }}
+
+{{ voce(8, "Prof. Fabrizio Angeloni", "1 giugno 2023",
+   "Il progetto della segnaletica, la costruzione di spazi per la didattica: l'esperienza di un professore di Storia dell'arte.",
+   "WYr_qVxJpLs", flip=true) }}
+
+{{ voce(9, "Prof.ssa Maria Gabriella Ianni", "29 marzo 2023",
+   "Il \"fiore all'occhiello di Tor Bella Monaca\": il liceo Amaldi nelle memorie di una docente ora in pensione.",
+   "BIikHVZXCus") }}
+
+{{ voce(10, "Prof.ssa Daniela Santese", "29 marzo 2023",
+   "\"Un'isola felice\": il liceo e il quartiere, dalla nascita ai giorni nostri.",
+   "K3AWIQOUGHU", flip=true) }}
+
+<hr class="mt-4">
+
+{% endblock %}

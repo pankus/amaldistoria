@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<div class="page-banner">
+  <div class="page-banner-inner">
+    <span class="section-label mb-2 d-block">Mappe</span>
+    <h1>Distribuzione nel tempo</h1>
+    <p class="lead">Evoluzione geografica degli iscritti anno per anno</p>
+  </div>
+</div>
+
+<div class="row g-4 align-items-start">
+
+  {# ==================== SIDEBAR ==================== #}
+  <div class="col-lg-3">
+    <div class="map-sidebar sticky-top" style="top:76px;">
+
+      <p class="section-label mb-2">Anno selezionato</p>
+      <p id="year-display" style="font-family:var(--font-mono);font-size:1.1rem;
+         font-weight:600;color:var(--c-accent);margin:0 0 1rem;">—</p>
+
+      <label for="year-slider" class="form-label">Scorri gli anni</label>
+      <input type="range" class="form-range" id="year-slider"
+             min="0" value="0" step="1">
+
+      <div class="d-flex justify-content-between mt-1 mb-4"
+           style="font-size:.7rem;color:var(--c-muted);">
+        <span id="year-min"></span>
+        <span id="year-max"></span>
+      </div>
+
+      <div class="d-flex gap-2 mb-4">
+        <button class="btn btn-primary btn-sm flex-fill" id="btn-play">
+          <i class="bi bi-play-fill me-1"></i>Play
+        </button>
+        <button class="btn btn-outline-secondary btn-sm flex-fill" id="btn-pause">
+          <i class="bi bi-pause-fill me-1"></i>Pausa
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" id="btn-reset" title="Reset">
+          <i class="bi bi-skip-start-fill"></i>
+        </button>
+      </div>
+
+      <label class="form-label">Velocità</label>
+      <input type="range" class="form-range mb-4" id="speed-slider"
+             min="200" max="2000" value="800" step="200">
+
+      <hr style="border-color:var(--c-border-lt);margin:1rem 0;">
+
+      <p class="section-label mb-2">Layer</p>
+      <label class="layer-toggle-row mb-1">
+        <input type="checkbox" id="toggle-school" checked>
+        <span class="layer-dot" style="background:#a61717;border-radius:2px;"></span>
+        Scuola
+      </label>
+
+      <hr style="border-color:var(--c-border-lt);margin:1rem 0;">
+
+      <p class="section-label mb-2">Basemap</p>
+      <div class="d-flex flex-column gap-1">
+          <label class="layer-toggle-row">
+              <input type="radio" name="basemap" value="osm" checked> OpenStreetMap
+          </label>
+          <label class="layer-toggle-row">
+              <input type="radio" name="basemap" value="carto-light"> Carto Positron
+          </label>
+        <label class="layer-toggle-row">
+          <input type="radio" name="basemap" value="carto-dark"> Carto Dark
+        </label>
+      </div>
+
+    </div>
+  </div>
+
+  {# ==================== MAPPA ==================== #}
+  <div class="col-lg-9">
+    <div id="map-time" style="height:560px;width:100%;border-radius:var(--radius-md);border:1px solid var(--c-border-lt);box-shadow:var(--shadow);"></div>
+    <div class="map-info-box mt-2" style="font-size:.78rem;color:var(--c-muted);">
+      © <a href="https://www.openstreetmap.org/copyright" target="_blank" style="color:inherit;">OpenStreetMap</a>
+      contributors © <a href="https://carto.com/attributions" target="_blank" style="color:inherit;">CARTO</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+.layer-toggle-row {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .82rem; color: var(--c-ink-2);
+  cursor: pointer; user-select: none;
+}
+.layer-toggle-row input { cursor: pointer; accent-color: var(--c-accent); }
+</style>
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+<script>
+(function () {
+  var TIME_DATA    = {{ (time_data if time_data is defined else {})|tojson }};
+  var YEARS        = {{ (years if years is defined else [])|tojson }};
+  var SCHOOL_DATA  = {{ (school_markers if school_markers is defined else [])|tojson }};
+
+  /* ---- UI ---- */
+  var slider      = document.getElementById('year-slider');
+  var yearDisplay = document.getElementById('year-display');
+  var btnPlay     = document.getElementById('btn-play');
+  var btnPause    = document.getElementById('btn-pause');
+  var btnReset    = document.getElementById('btn-reset');
+  var speedSlider = document.getElementById('speed-slider');
+
+  slider.max = YEARS.length - 1;
+  document.getElementById('year-min').textContent = YEARS[0];
+  document.getElementById('year-max').textContent = YEARS[YEARS.length - 1];
+
+  /* ---- Tiles ---- */
+  var TILES = {
+    'carto-light': L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      { maxZoom: 19, subdomains: 'abcd' }
+    ),
+    'carto-dark': L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+      { maxZoom: 19, subdomains: 'abcd' }
+    ),
+    'osm': L.tileLayer(
+      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      { maxZoom: 19 }
+    )
+  };
+
+  var map = L.map('map-time', {
+    center: [41.875696, 12.622261],
+    zoom: 12,
+    zoomControl: true
+  });
+  setTimeout(function () { map.invalidateSize(); }, 200);
+
+  var currentTile = TILES['osm'].addTo(map);
+  L.control.scale({ imperial: false }).addTo(map);
+
+  /* ---- Scuola marker ---- */
+  var schoolGroup = L.layerGroup();
+  function createPermanentLabel(text, color) {
+    return L.divIcon({
+      className: 'permanent-label',
+      html: '<div style="display:flex; align-items:center; gap:4px;">' +
+              '<div style="width:14px;height:14px;background:' + color +
+              ';border:2px solid #fff;border-radius:3px;box-shadow:0 1px 4px rgba(0,0,0,.4);"></div>' +
+              '<span style="background:' + color + '; color:white; padding:2px 8px; ' +
+              'border-radius:12px; font-size:11px; font-weight:600; ' +
+              'white-space:nowrap; box-shadow:0 1px 4px rgba(0,0,0,0.3); ' +
+              'border:1px solid white;">' + text + '</span>' +
+            '</div>',
+      iconSize: [null, null],
+      iconAnchor: [0, 0],
+      popupAnchor: [0, -18]
+    });
+  }
+  // SCHOOL_DATA.forEach(function(m) {
+  //   L.marker([m.lat, m.lon], { icon: schoolIcon(m.color) })
+  //     .bindPopup(m.popup).addTo(schoolGroup);
+  // });
+  if (SCHOOL_DATA && SCHOOL_DATA.length > 0) {
+    SCHOOL_DATA.forEach(function(m) {
+      var labelIcon = createPermanentLabel(m.name || 'Liceo Amaldi', m.color || '#a61717');
+      L.marker([m.lat, m.lon], { icon: labelIcon })
+        .bindPopup(m.popup || m.name || 'Liceo Scientifico Statale "E. Amaldi"')
+        .addTo(schoolGroup);
+    });
+  }
+  schoolGroup.addTo(map);
+
+  /* ---- Heat layer ---- */
+  var heatLayer = null;
+
+  function showYear(idx) {
+    var year = YEARS[idx];
+    yearDisplay.textContent = year;
+    slider.value = idx;
+
+    var pts = TIME_DATA[year] || [];
+    if (heatLayer) map.removeLayer(heatLayer);
+    if (pts.length) {
+      heatLayer = L.heatLayer(pts, {
+        radius: 20, blur: 18, minOpacity: 0.4,
+        // gradient: { 0.2: '#3b82f6', 0.5: '#f59e0b', 0.8: '#ef4444', 1.0: '#7f1d1d' }
+      }).addTo(map);
+    }
+  }
+
+  showYear(0);
+
+  /* ---- Slider ---- */
+  slider.addEventListener('input', function () {
+    showYear(parseInt(this.value));
+  });
+
+  /* ---- Play / Pause ---- */
+  var timer = null;
+  var currentIdx = 0;
+
+  function play() {
+    if (timer) return;
+    timer = setInterval(function () {
+      currentIdx = parseInt(slider.value);
+      if (currentIdx >= YEARS.length - 1) {
+        clearInterval(timer); timer = null; return;
+      }
+      showYear(currentIdx + 1);
+    }, parseInt(speedSlider.value));
+  }
+
+  function pause() {
+    clearInterval(timer); timer = null;
+  }
+
+  btnPlay.addEventListener('click', play);
+  btnPause.addEventListener('click', pause);
+  btnReset.addEventListener('click', function () {
+    pause(); showYear(0);
+  });
+
+  /* ---- Controlli layer / basemap ---- */
+  document.getElementById('toggle-school').addEventListener('change', function () {
+    this.checked ? schoolGroup.addTo(map) : map.removeLayer(schoolGroup);
+  });
+
+  document.querySelectorAll('input[name="basemap"]').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      map.removeLayer(currentTile);
+      currentTile = TILES[this.value].addTo(map);
+    });
+  });
+
+})();
+</script>
+{% endblock %}
