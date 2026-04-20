@@ -5,7 +5,7 @@ import logging
 
 logging.basicConfig(stream=sys.stderr)
 # server produzione
-activate_this = '/root/www/amaldistoria/venv/bin/activate_this.py'
+activate_this = '/var/www/amaldistoria/venv/bin/activate_this.py'
 
 # for Python3
 with open(activate_this) as file_:
@@ -15,7 +15,7 @@ sys.stdout = sys.stderr
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..'))
 
 # server produzione
-sys.path.append('/root/www/amaldistoria/')
+sys.path.append('/var/www/amaldistoria/')
 
 # from amaldiapp import app as application
 from app import app as application
