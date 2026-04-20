@@ -17,4 +17,5 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '..
 # server produzione
 sys.path.append('/root/www/amaldistoria/')
 
-from amaldiapp import app as application
+# from amaldiapp import app as application
+from app import app as application
