@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block container_class %}container-fluid dashboard-wide{% endblock %}
+
 {% block app_content %}
 <div class="page-banner">
   <div class="page-banner-inner">
@@ -23,7 +25,7 @@
           <label for="selanno" class="form-label">Anno scolastico</label>
           <select class="form-select form-select-sm" id="selanno" name="anno"
                   onchange="this.form.submit()">
-            {% for val in params|reverse %}
+            {% for val in params %}
               <option value="{{ val }}" {% if val == param %}selected{% endif %}>{{ val }}</option>
             {% endfor %}
           </select>
@@ -147,7 +149,7 @@
     {# Griglia 2×2 torte #}
     <div class="row g-3 mb-4">
 
-      <div class="col-sm-6">
+      <div class="col-md-6 col-xxl-4">
         <div class="chart-card">
           <div class="chart-card-header">
             <span class="chart-card-title">Indirizzo di studi</span>
@@ -164,7 +166,7 @@
         </div>
       </div>
 
-      <div class="col-sm-6">
+      <div class="col-md-6 col-xxl-4">
         <div class="chart-card">
           <div class="chart-card-header">
             <span class="chart-card-title">Genere</span>
@@ -181,7 +183,7 @@
         </div>
       </div>
 
-      <div class="col-sm-6">
+      <div class="col-md-6 col-xxl-4">
         <div class="chart-card">
           <div class="chart-card-header">
             <span class="chart-card-title">Cittadinanza</span>
@@ -203,7 +205,7 @@
         </div>
       </div>
 
-      <div class="col-sm-6">
+      <div class="col-md-6 col-xxl-4">
         <div class="chart-card">
           <div class="chart-card-header">
             <span class="chart-card-title">CAP di residenza</span>
@@ -216,6 +218,40 @@
           </div>
           <figure class="highcharts-figure mb-0">
             <div id="chart_cap_pie"></div>
+          </figure>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-xxl-4">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-card-title">Esito finale</span>
+            <button class="chart-expand-btn" data-chart="esito"
+                    data-title="Esito finale"
+                    data-bs-toggle="modal" data-bs-target="#chartModal"
+                    title="Espandi">
+              <i class="bi bi-arrows-fullscreen"></i>
+            </button>
+          </div>
+          <figure class="highcharts-figure mb-0">
+            <div id="chart_esito_pie"></div>
+          </figure>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-xxl-4">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-card-title">Anno di corso</span>
+            <button class="chart-expand-btn" data-chart="anno_corso"
+                    data-title="Anno di corso"
+                    data-bs-toggle="modal" data-bs-target="#chartModal"
+                    title="Espandi">
+              <i class="bi bi-arrows-fullscreen"></i>
+            </button>
+          </div>
+          <figure class="highcharts-figure mb-0">
+            <div id="chart_anno_corso_pie"></div>
           </figure>
         </div>
       </div>
@@ -235,6 +271,17 @@
          box-shadow:var(--shadow);
          background:#f0f0f0;"></div>
     <div class="map-info-box d-flex align-items-center gap-3 flex-wrap mt-2">
+      <div class="coverage">
+        <div class="coverage-head">
+          <span class="section-label mb-0">Copertura</span>
+          <span class="coverage-value">{{ '%.1f'|format(copertura)|replace('.', ',') }}%</span>
+        </div>
+        <div class="coverage-bar"><span style="width:{{ copertura }}%;"></span></div>
+        <p class="coverage-note mb-0">
+          {{ geocodificati }} di {{ alunni_filtered }} studenti in mappa{% if senza_geo %} ·
+          {{ senza_geo }} senza indirizzo geocodificato{% endif %}
+        </p>
+      </div>
       <p class="section-label mb-0" style="white-space:nowrap;">Layer</p>
       <ul class="layer-legend mb-0">
         <li><span class="layer-dot" style="background:#e8571a;"></span>Heat map</li>
@@ -313,7 +360,9 @@ document.addEventListener('DOMContentLoaded', function() {
     indirizzo:    [ {% for i in chart_indirizzo.items()   %}['{{ i[0]|capitalize|safe }}', {{ i[1] }}],{% endfor %} ],
     genere:       [ {% for i in chart_genere.items()      %}['{{ i[0]|capitalize|safe }}', {{ i[1] }}],{% endfor %} ],
     cittadinanza: [ {% for i in chart_cittadinanza.items()%}['{{ i[0]|capitalize|safe }}', {{ i[1] }}],{% endfor %} ],
-    cap:          [ {% for i in chart_cap.items()         %}['{{ i[0]|capitalize|safe }}', {{ i[1] }}],{% endfor %} ]
+    cap:          [ {% for i in chart_cap.items()         %}['{{ i[0]|capitalize|safe }}', {{ i[1] }}],{% endfor %} ],
+    esito:        [ {% for i in chart_esito.items()       %}['{{ i[0]|capitalize|safe }}', {{ i[1] }}],{% endfor %} ],
+    anno_corso:   [ {% for i in chart_anno_corso.items()  %}['{{ i[0]|capitalize|safe }}', {{ i[1] }}],{% endfor %} ]
   };
 
   /* ================================================
@@ -388,6 +437,16 @@ document.addEventListener('DOMContentLoaded', function() {
       { chart: { height: 280 } })
   );
 
+  charts.esito = Highcharts.chart('chart_esito_pie',
+    $.extend(true, pieOptions('Esito finale', RAW.esito, PALETTE),
+      { chart: { height: 280 } })
+  );
+
+  charts.anno_corso = Highcharts.chart('chart_anno_corso_pie',
+    $.extend(true, pieOptions('Anno di corso', RAW.anno_corso, PALETTE),
+      { chart: { height: 280 } })
+  );
+
   /* ---- Toggle "italiana" ---- */
   $('#toggle-naz').on('click', function() {
     var pt = charts.cittadinanza.series[0].data[0];
@@ -403,7 +462,9 @@ document.addEventListener('DOMContentLoaded', function() {
     genere:    PALETTE_GENDER,
     indirizzo: PALETTE,
     cittadinanza: PALETTE,
-    cap:       PALETTE
+    cap:       PALETTE,
+    esito:     PALETTE,
+    anno_corso: PALETTE
   };
   var extraMap = {
     genere: { size: '80%' }

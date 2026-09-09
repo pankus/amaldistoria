@@ -1,0 +1,515 @@
+{% extends "base.html" %}
+{% block title %}{{ via }} — Revisione{% endblock %}
+
+{% macro campi_gruppo() %}
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <input type="hidden" name="via" value="{{ via }}">
+  <input type="hidden" name="comune" value="{{ comune }}">
+{% endmacro %}
+
+{% macro fuori_comune(s, stile) %}
+  <div class="d-inline-block text-end">
+    <span class="badge bg-danger-subtle text-danger-emphasis d-block mb-1"
+          title="Il punto cade fuori dal comune dichiarato">
+      cade in {{ s.comune_punto or 'un altro comune' }}
+    </span>
+    <form method="post" action="{{ url_for('revisione.collega') }}"
+          onsubmit="return confirm('Il punto di «{{ s.road }}» cade in {{ s.comune_punto or 'un altro comune' }}, non in {{ comune }}.\n\nCollegare comunque {{ n }} alunni?\nIl collegamento resta segnato come forzato e audit-geo lo elencherà a ogni esecuzione.')">
+      {{ campi_gruppo() }}
+      <input type="hidden" name="strada_id" value="{{ s.id }}">
+      <input type="hidden" name="forza" value="1">
+      <button class="btn btn-sm {{ stile }}">Collega comunque</button>
+    </form>
+  </div>
+{% endmacro %}
+
+{# Ogni modo di assegnare un indirizzo e' una fonte diversa, con affidabilita'
+   diversa: la card lo dice, invece di lasciarli in fila come titoletti uguali. #}
+{% macro apri_card(numero, titolo, quando) %}
+  <div class="card mb-4">
+    <div class="card-header bg-white d-flex align-items-baseline gap-2 flex-wrap">
+      <span class="badge rounded-pill bg-secondary">{{ numero }}</span>
+      <strong>{{ titolo }}</strong>
+      <span class="text-muted small">{{ quando }}</span>
+    </div>
+    <div class="card-body">
+{% endmacro %}
+
+{% macro chiudi_card() %}
+    </div>
+  </div>
+{% endmacro %}
+
+{% block app_content %}
+<div class="page-banner">
+  <div class="page-banner-inner">
+    <span class="section-label mb-2 d-block">
+      <a href="{{ url_for('revisione.coda') }}" class="text-reset">← Revisione indirizzi</a>
+    </span>
+    <h1>{{ via }}</h1>
+    <p class="lead">{{ n }} alunni · comune dichiarato <strong>{{ comune or '—' }}</strong>
+      {% if caps %}· CAP
+        {% for c, quanti in caps %}<strong>{{ c }}</strong>{% if caps|length > 1 %}
+          <span class="text-muted">({{ quanti }})</span>{% endif %}{{ ' · ' if not loop.last }}{% endfor %}
+      {% endif %}</p>
+  </div>
+</div>
+
+{% if caps|length > 1 %}
+<div class="alert alert-warning py-2 small">
+  Gli alunni di questo gruppo hanno scritto <strong>CAP diversi</strong>. Con quale
+  salvare una via nuova:
+  <select id="cap-scelto" class="form-select form-select-sm d-inline-block w-auto mx-1">
+    {% for c, quanti in caps %}
+    <option value="{{ c }}">{{ c }} — {{ quanti }} alunni</option>
+    {% endfor %}
+  </select>
+  Collegare a una via <em>già in archivio</em> non lo usa: quella il CAP ce l'ha già.
+</div>
+{% endif %}
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <h2 class="h6 text-uppercase text-muted">Come l'ha scritto la segreteria</h2>
+    <ul class="list-group list-group-flush mb-4">
+      {% for testo, quanti in indirizzi %}
+      <li class="list-group-item d-flex justify-content-between px-0">
+        <span>{{ testo }}</span><span class="text-muted">{{ quanti }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="text-muted small">
+      Motivo per cui è in coda: <strong>{{ motivo }}</strong>.
+    </p>
+    <div class="alert alert-light border small">
+      <strong>Quattro modi, dal più sicuro al meno.</strong> Il primo che risolve il caso è
+      quello giusto: riusare un punto che esiste è sempre meglio che crearne uno.
+      <hr class="my-2">
+      <strong>Quando una riga è «fuori comune».</strong> Si salva il baricentro della via:
+      su una strada a cavallo del confine cade dall'altra parte (tollerato fino a 100 m).
+      Oltre, di solito è un'<em>omonimia</em> — 891 collegamenti storici erano finiti così.
+      Ma può anche essere sbagliato il comune scritto dalla segreteria, e allora si forza:
+      i bottoni rossi «comunque» servono a quello. Ogni forzatura resta registrata e
+      <code>flask audit-geo</code> la elenca a parte.
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+
+    {{ apri_card(1, 'Già in archivio', 'riusa un punto già salvato — non duplica') }}
+    {% if esistenti %}
+    <table class="table table-sm align-middle mb-0">
+      <tbody>
+        {% for s in esistenti %}
+        <tr>
+          <td>
+            {{ s.road }}
+            <span class="badge bg-secondary-subtle text-secondary-emphasis">CAP {{ s.cap or '—' }}</span>
+            <span class="badge bg-success-subtle text-success-emphasis">{{ s.regola }}</span>
+            {% if s.cap_alunni %}
+              <span class="badge bg-primary-subtle text-primary-emphasis">
+                {{ s.cap_alunni }} alunni del gruppo con questo CAP</span>
+            {% endif %}
+            <div class="text-muted small">
+              {{ s.city or '—' }} · {{ s.alunni }} alunni già collegati
+              {% if s.comune_punto %}· il punto è in {{ s.comune_punto }}{% endif %}
+            </div>
+          </td>
+          <td class="text-end">
+            {% if s.ok %}
+            <form method="post" action="{{ url_for('revisione.collega') }}">
+              {{ campi_gruppo() }}
+              <input type="hidden" name="strada_id" value="{{ s.id }}">
+              <button class="btn btn-sm btn-primary">Collega qui</button>
+            </form>
+            {% else %}
+            {{ fuori_comune(s, 'btn-outline-danger') }}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted small mb-0">Nessuna via con questo nome è già in archivio.</p>
+    {% endif %}
+    {{ chiudi_card() }}
+
+    {{ apri_card(2, 'Vie dello stradario di ' ~ (comune or 'quel comune'),
+                 'le vie vere di OpenStreetMap, il punto ce l’hanno già') }}
+    {% if proposte %}
+    <p class="text-muted small mb-2">
+      Lo stradario non ha il CAP: verranno salvate con
+      <strong class="cap-nuovo">{{ cap or '—' }}</strong>, il CAP del gruppo.
+    </p>
+    <table class="table table-sm align-middle">
+      <tbody>
+        {% for p in proposte %}
+        <tr>
+          <td>
+            {{ p.nome }}
+            {% if proposta and p.nome == proposta %}
+              <span class="badge bg-success-subtle text-success-emphasis">proposta</span>
+            {% elif p.regola %}
+              <span class="badge bg-success-subtle text-success-emphasis">{{ p.regola }}</span>
+            {% endif %}
+            <div class="text-muted small">{{ p.comune }}</div>
+          </td>
+          <td class="text-end">
+            <form method="post" action="{{ url_for('revisione.crea') }}">
+              {{ campi_gruppo() }}
+              <input type="hidden" name="nome" value="{{ p.nome }}">
+              <input type="hidden" name="lat" value="{{ p.lat }}">
+              <input type="hidden" name="lon" value="{{ p.lon }}">
+              <input type="hidden" name="cap" value="{{ cap }}">
+              <input type="hidden" name="citta" value="{{ p.comune }}">
+              <button class="btn btn-sm btn-outline-primary">Crea e collega</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted small {{ 'mb-0' if not (altre or esistenti_altre) }}">
+      Nessuna via compatibile nello stradario di {{ comune }}: è il motivo per cui questo
+      gruppo è in coda.
+    </p>
+    {% endif %}
+
+    {% if altre or esistenti_altre %}
+    <details>
+      <summary class="h6 text-uppercase text-muted">
+        Altre vie di {{ comune }} che condividono qualche parola
+        ({{ altre|length + esistenti_altre|length }})
+      </summary>
+      <p class="text-muted small mt-2">
+        Nessuna regola le riconosce come la stessa via — <code>LAGO DI BOLSENA</code> e
+        <code>Lago di Bracciano</code> stanno qui. Servono quando il nome vero è
+        diverso da quello scritto (<code>FRANCESCO MENGARONI</code> per
+        <code>Largo Ferruccio Mengaroni</code>): è una decisione tua, non del programma.
+      </p>
+      <table class="table table-sm align-middle mb-0">
+        <tbody>
+          {% for s in esistenti_altre %}
+          <tr>
+            <td>
+              {{ s.road }}
+              <span class="badge bg-secondary-subtle text-secondary-emphasis">CAP {{ s.cap or '—' }}</span>
+              <span class="badge bg-light text-muted">già in archivio</span>
+              {% if s.cap_alunni %}
+                <span class="badge bg-primary-subtle text-primary-emphasis">
+                  {{ s.cap_alunni }} alunni del gruppo con questo CAP</span>
+              {% endif %}
+              <div class="text-muted small">
+                {{ s.city or '—' }} · {{ s.alunni }} alunni già collegati
+                {% if s.comune_punto %}· il punto è in {{ s.comune_punto }}{% endif %}
+              </div>
+            </td>
+            <td class="text-end">
+              {% if s.ok %}
+              <form method="post" action="{{ url_for('revisione.collega') }}">
+                {{ campi_gruppo() }}
+                <input type="hidden" name="strada_id" value="{{ s.id }}">
+                <button class="btn btn-sm btn-outline-secondary">Collega qui</button>
+              </form>
+              {% else %}
+              {{ fuori_comune(s, 'btn-outline-danger') }}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          {% for p in altre %}
+          <tr>
+            <td>{{ p.nome }}<div class="text-muted small">{{ p.comune }}</div></td>
+            <td class="text-end">
+              <form method="post" action="{{ url_for('revisione.crea') }}">
+                {{ campi_gruppo() }}
+                <input type="hidden" name="nome" value="{{ p.nome }}">
+                <input type="hidden" name="lat" value="{{ p.lat }}">
+                <input type="hidden" name="lon" value="{{ p.lon }}">
+                <input type="hidden" name="cap" value="{{ cap }}">
+                <input type="hidden" name="citta" value="{{ p.comune }}">
+                <button class="btn btn-sm btn-outline-secondary">Crea e collega</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </details>
+    {% endif %}
+    {{ chiudi_card() }}
+
+    {{ apri_card(3, 'Cerca su OpenStreetMap', 'quando la via non è nello stradario') }}
+    <p class="text-muted small">
+      Ogni risultato dice <strong>in che comune cade il suo punto</strong>. Se non è
+      {{ comune or 'quello dichiarato' }} si può creare lo stesso, ma col bottone rosso e
+      la forzatura registrata.
+    </p>
+    <div class="input-group mb-3">
+      <input type="search" id="q" class="form-control"
+             value="{{ via }} {{ comune }}" placeholder="Via e comune">
+      <button type="button" class="btn btn-outline-secondary" id="cerca">Cerca</button>
+    </div>
+    <div id="risultati"></div>
+    {{ chiudi_card() }}
+
+    {{ apri_card(4, 'Metti il punto a mano', 'quando nessuna fonte la conosce') }}
+    <p class="text-muted small">
+      Succede: OpenStreetMap non è completo. Le vie già note sono segnate sulla mappa —
+      colloca il punto fra quelle. Con lo sfondo <em>Ortofoto</em> si vede il sedime
+      stradale anche dove la mappa vettoriale è vuota.
+      La ricerca qui sotto <strong>sposta soltanto la mappa</strong>: il cerchio arancione
+      è il risultato trovato, il punto da salvare resta quello che clicchi tu.
+    </p>
+
+    <form method="post" action="{{ url_for('revisione.crea') }}" id="form-manuale">
+      {{ campi_gruppo() }}
+      <input type="hidden" name="fonte" value="manuale">
+      <input type="hidden" name="forza" id="forza-manuale" value="">
+      <input type="hidden" name="cap" value="{{ cap }}">
+      <input type="hidden" name="citta" value="{{ comune }}">
+      <input type="hidden" name="lat" id="lat">
+      <input type="hidden" name="lon" id="lon">
+
+      <div class="row g-2 align-items-end mb-2">
+        <div class="col-sm-7">
+          <label class="form-label small text-muted mb-1">Nome della via da salvare</label>
+          <input type="text" class="form-control" name="nome" value="{{ nome_suggerito }}"
+                 required maxlength="128">
+        </div>
+        <div class="col-sm-5">
+          <div class="small text-muted mb-1">
+            {{ comune }}{% if cap %} · CAP <span class="cap-nuovo">{{ cap }}</span>{% endif %}
+          </div>
+          <div class="small" id="coordinate">Clicca sulla mappa per scegliere il punto.</div>
+        </div>
+      </div>
+
+      <div class="input-group input-group-sm mb-2">
+        <input type="search" id="qm" class="form-control"
+               placeholder="Cerca una via per portarci la mappa (es. Via Troina)">
+        <button type="button" class="btn btn-outline-secondary" id="cerca-mappa">Vai</button>
+      </div>
+      <div id="risultati-mappa" class="mb-2 small"></div>
+
+      <div id="mappa" style="height:420px;" class="rounded border mb-2"></div>
+
+      <button class="btn btn-primary" id="salva-manuale" disabled>Salva il punto e collega</button>
+    </form>
+    {{ chiudi_card() }}
+  </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const comuneTxt = {{ (comune or '')|tojson }};
+
+  const capScelto = document.getElementById('cap-scelto');
+  const capCorrente = () => capScelto ? capScelto.value : {{ (cap or '')|tojson }};
+  if (capScelto) capScelto.addEventListener('change', () => {
+    for (const i of document.querySelectorAll('input[name="cap"]')) i.value = capCorrente();
+    for (const e of document.querySelectorAll('.cap-nuovo')) e.textContent = capCorrente();
+  });
+
+  // Dove cade ogni punto, prima di provare a salvarlo: cosi' il bottone giusto sta
+  // gia' sotto il risultato, invece di far scoprire il rifiuto dopo il click.
+  async function dove(punti) {
+    if (!punti.length) return [];
+    const u = '/revisione/dove?comune=' + encodeURIComponent(comuneTxt)
+            + punti.map(p => '&p=' + p[0] + ',' + p[1]).join('');
+    return await (await fetch(u)).json();
+  }
+
+  const distanza = m => m >= 2000 ? (m / 1000).toFixed(0) + ' km' : m + ' m';
+
+  function etichettaDove(e) {
+    if (!e) return '<span class="badge bg-light text-muted">posizione ignota</span>';
+    if (e.ok) return '<span class="badge bg-success-subtle text-success-emphasis">in '
+                   + (e.comune || comuneTxt) + '</span>';
+    return '<span class="badge bg-danger-subtle text-danger-emphasis">cade in '
+         + (e.comune || 'un altro comune') + ' · ' + distanza(e.metri)
+         + ' fuori da ' + comuneTxt + '</span>';
+  }
+
+  // Su timeout l'endpoint risponde {error: ...}, non una lista: normalizzato qui.
+  async function nominatim(testo) {
+    const r = await fetch('/search/address?q=' + encodeURIComponent(testo));
+    const d = await r.json();
+    return Array.isArray(d) ? d : [];
+  }
+
+  const q = document.getElementById('q');
+  const box = document.getElementById('risultati');
+
+  async function cerca() {
+    box.innerHTML = '<p class="text-muted">Ricerca in corso…</p>';
+    const dati = await nominatim(q.value);
+    if (!dati.length) {
+      box.innerHTML = '<p class="text-muted">Nessun risultato.</p>';
+      return;
+    }
+    const esiti = await dove(dati.map(d => [d.lat, d.lon]));
+    box.innerHTML = '';
+    dati.forEach((d, i) => {
+      const e = esiti[i];
+      const fuori = !!(e && !e.ok);
+      const nome = d.road || d.display_name;
+      const form = document.createElement('form');
+      form.method = 'post';
+      form.action = '{{ url_for("revisione.crea") }}';
+      form.className = 'd-flex justify-content-between align-items-center border-bottom py-2 gap-3';
+      if (fuori) form.onsubmit = () => confirm(
+        'Il punto di «' + nome + '» cade in ' + (e.comune || 'un altro comune') + ', '
+        + distanza(e.metri) + ' fuori da ' + comuneTxt + '.\n\n'
+        + 'Crearla e collegare {{ n }} alunni?\n'
+        + 'Resta segnata come forzata e audit-geo la elencherà a ogni esecuzione.');
+      form.innerHTML = `
+        {{ campi_gruppo()|replace('\n', '')|safe }}
+        <input type="hidden" name="nome" value="${nome}">
+        <input type="hidden" name="lat" value="${d.lat}">
+        <input type="hidden" name="lon" value="${d.lon}">
+        <input type="hidden" name="cap" value="${d.postcode || capCorrente()}">
+        <input type="hidden" name="citta" value="${d.city || comuneTxt}">
+        <input type="hidden" name="forza" value="${fuori ? '1' : ''}">
+        <span class="small">${d.display_name}<br>${etichettaDove(e)}</span>
+        <button class="btn btn-sm flex-shrink-0 ${fuori ? 'btn-outline-danger' : 'btn-outline-primary'}">
+          ${fuori ? 'Crea comunque' : 'Crea e collega'}</button>`;
+      box.appendChild(form);
+    });
+  }
+  document.getElementById('cerca').addEventListener('click', cerca);
+  q.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); cerca(); } });
+
+  // ---- mappa per il punto messo a mano ----
+  const centro = {{ centro|tojson }};
+  const mappa = L.map('mappa').setView(centro, {{ zoom }});
+  const sfondi = {
+    'Mappa': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }),
+    'Ortofoto': L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      { maxZoom: 19, attribution: 'Imagery © Esri, Maxar, Earthstar Geographics' })
+  };
+  sfondi['Mappa'].addTo(mappa);
+  L.control.layers(sfondi, null, { collapsed: false }).addTo(mappa);
+
+  const lat = document.getElementById('lat');
+  const lon = document.getElementById('lon');
+  const coordinate = document.getElementById('coordinate');
+  const salva = document.getElementById('salva-manuale');
+  const forzaManuale = document.getElementById('forza-manuale');
+  let punto = null, statoPunto = null;
+
+  async function metti(ll) {
+    if (punto) { punto.setLatLng(ll); }
+    else {
+      punto = L.marker(ll, { draggable: true }).addTo(mappa);
+      punto.on('dragend', () => metti(punto.getLatLng()));
+    }
+    lat.value = ll.lat.toFixed(6);
+    lon.value = ll.lng.toFixed(6);
+    coordinate.textContent = `Punto: ${lat.value}, ${lon.value}`;
+    salva.disabled = false;
+
+    // Il punto si verifica appena posato: il bottone deve dire cosa sta per fare.
+    [statoPunto] = await dove([[lat.value, lon.value]]);
+    const fuori = !!(statoPunto && !statoPunto.ok);
+    forzaManuale.value = fuori ? '1' : '';
+    salva.className = 'btn ' + (fuori ? 'btn-danger' : 'btn-primary');
+    salva.textContent = fuori ? 'Salva comunque e collega' : 'Salva il punto e collega';
+    if (fuori) coordinate.innerHTML = `Punto: ${lat.value}, ${lon.value}<br>`
+      + '<span class="text-danger">cade in '
+      + (statoPunto.comune || 'un altro comune') + ', ' + distanza(statoPunto.metri)
+      + ' fuori da ' + comuneTxt + '</span>';
+  }
+  mappa.on('click', e => metti(e.latlng));
+
+  document.getElementById('form-manuale').addEventListener('submit', e => {
+    if (statoPunto && !statoPunto.ok && !confirm(
+        'Il punto cade in ' + (statoPunto.comune || 'un altro comune') + ', '
+        + distanza(statoPunto.metri) + ' fuori da ' + comuneTxt + '.\n\n'
+        + 'Salvarlo comunque e collegare {{ n }} alunni?\n'
+        + 'Resta segnato come forzato e audit-geo lo elencherà a ogni esecuzione.')) {
+      e.preventDefault();
+    }
+  });
+
+  // Le vie note dentro il riquadro visibile: servono a collocare quella che manca.
+  const noti = L.layerGroup().addTo(mappa);
+  let inCorso = null;
+  async function vicine() {
+    if (mappa.getZoom() < 15) { noti.clearLayers(); return; }
+    const b = mappa.getBounds();
+    const u = `/revisione/vicine?s=${b.getSouth()}&o=${b.getWest()}`
+            + `&n=${b.getNorth()}&e=${b.getEast()}`;
+    if (inCorso === u) return;
+    inCorso = u;
+    const dati = await (await fetch(u)).json();
+    noti.clearLayers();
+    const etichette = mappa.getZoom() >= 16;
+    for (const v of dati) {
+      const m = L.circleMarker([v.lat, v.lon], {
+        radius: 4, color: '#0d6efd', weight: 1, fillOpacity: .7, interactive: !etichette
+      });
+      if (etichette) m.bindTooltip(v.nome, { permanent: true, direction: 'right',
+                                             className: 'small' });
+      else m.bindTooltip(v.nome);
+      m.addTo(noti);
+    }
+  }
+  mappa.on('moveend', vicine);
+  vicine();
+
+  // ---- ricerca per portare la mappa dove serve ----
+  // Non crea e non collega niente: sposta la vista. Il comune si aggiunge alla
+  // query quando non e' gia' scritto, altrimenti Nominatim allenta il vincolo e
+  // risponde con l'omonima a centinaia di chilometri.
+  const boxMappa = document.getElementById('risultati-mappa');
+  let riferimento = null;
+
+  function vaiA(la, lo, etichetta) {
+    mappa.setView([la, lo], 17);   // 17: sopra la soglia delle etichette di vicine()
+    if (riferimento) mappa.removeLayer(riferimento);
+    riferimento = L.circleMarker([la, lo], {
+      radius: 8, color: '#fd7e14', weight: 2, fillOpacity: .2
+    }).addTo(mappa).bindTooltip(etichetta).openTooltip();
+  }
+
+  async function cercaMappa() {
+    const t = document.getElementById('qm').value.trim();
+    if (!t) return;
+    const query = comuneTxt && !t.toLowerCase().includes(comuneTxt.toLowerCase())
+                ? t + ' ' + comuneTxt : t;
+    boxMappa.textContent = 'Ricerca in corso…';
+    const dati = await nominatim(query);
+    if (!dati.length) {
+      boxMappa.innerHTML = '<span class="text-muted">Nessun risultato.</span>';
+      return;
+    }
+    boxMappa.innerHTML = '';
+    for (const d of dati) {
+      const a = document.createElement('a');
+      a.href = '#mappa';
+      a.className = 'd-block border-bottom py-1 text-decoration-none';
+      a.textContent = d.display_name;
+      a.addEventListener('click', () => vaiA(d.lat, d.lon, d.road || d.display_name));
+      boxMappa.appendChild(a);
+    }
+  }
+  document.getElementById('cerca-mappa').addEventListener('click', cercaMappa);
+  document.getElementById('qm').addEventListener('keydown', e => {
+    // Invio dentro #form-manuale lo invierebbe: qui deve solo cercare.
+    if (e.key === 'Enter') { e.preventDefault(); cercaMappa(); }
+  });
+</script>
+{% endblock %}

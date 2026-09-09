@@ -26,6 +26,28 @@ config.set_main_option(
         '%', '%%'))
 target_metadata = current_app.extensions['migrate'].db.metadata
 
+# Tabelle presenti nel database ma che NON appartengono al modello: sono dati
+# derivati, ricostruibili da `flask stradario-sync`, oppure di PostGIS. Senza
+# questo filtro un `flask db migrate` genererebbe un op.drop_table() per
+# ognuna, cancellando lo stradario alla prima migrazione distratta.
+TABELLE_ESTERNE = {
+    'istat_comuni',        # confini comunali ISTAT, caricati con ogr2ogr
+    'osm_strade_raw',      # strade OSM Geofabrik, caricate con ogr2ogr
+    'spatial_ref_sys',     # di PostGIS
+}
+
+
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == 'table' and name in TABELLE_ESTERNE:
+        return False
+    # Gli indici spaziali li creano GeoAlchemy2/PostGIS (e in parte li ha
+    # creati a mano chi ha costruito il database anni fa: `idx_strada_geom_add`).
+    # Alembic non li vede nei modelli e proporrebbe di cancellarli a ogni
+    # migrazione.
+    if type_ == 'index' and name and 'geom' in name:
+        return False
+    return True
+
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
@@ -46,7 +68,8 @@ def run_migrations_offline():
     """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url, target_metadata=target_metadata, literal_binds=True
+        url=url, target_metadata=target_metadata, literal_binds=True,
+        include_object=include_object
     )
 
     with context.begin_transaction():
@@ -77,6 +100,7 @@ def run_migrations_online():
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
+            include_object=include_object,
             process_revision_directives=process_revision_directives,
             **current_app.extensions['migrate'].configure_args
         )

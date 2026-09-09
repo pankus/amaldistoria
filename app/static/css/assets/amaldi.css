@@ -438,6 +438,63 @@ blockquote p { margin: 0; }
   margin-top: 1rem;
 }
 
+/* Dashboard a larghezza piena, con un tetto: oltre, le torte si stirano */
+.dashboard-wide {
+  max-width: 1800px;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Copertura geografica — quanti degli alunni selezionati finiscono in mappa */
+.coverage {
+  width: 230px;
+  flex-shrink: 0;
+  padding-right: 1.25rem;
+  border-right: 1px solid var(--c-border-lt);
+}
+.coverage-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-bottom: .35rem;
+}
+.coverage-value {
+  font-family: var(--font-head);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--c-accent);
+  line-height: 1;
+}
+.coverage-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--c-border-lt);
+  overflow: hidden;
+}
+.coverage-bar span {
+  display: block;
+  height: 100%;
+  background: var(--c-accent);
+  border-radius: 3px;
+  transition: width var(--transition);
+}
+.coverage-note {
+  margin-top: .4rem;
+  font-size: .72rem;
+  line-height: 1.35;
+  color: var(--c-muted);
+}
+@media (max-width: 767.98px) {
+  .coverage {
+    width: 100%;
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--c-border-lt);
+    padding-bottom: .75rem;
+  }
+}
+
 .layer-legend {
   list-style: none;
   padding: 0; margin: 0;

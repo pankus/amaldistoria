@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Revisione indirizzi — AmaldiStoria{% endblock %}
+
+{% block app_content %}
+<div class="page-banner">
+  <div class="page-banner-inner">
+    <span class="section-label mb-2 d-block">Manutenzione</span>
+    <h1>Revisione indirizzi</h1>
+    <p class="lead">
+      {{ righe|length }} vie da decidere, {{ totale }} alunni senza un punto sulla mappa.
+    </p>
+  </div>
+</div>
+
+<div class="alert alert-light border">
+  Una riga = una via, non un alunno. Collegando il gruppo si sistemano tutti gli
+  alunni che hanno scritto quell'indirizzo, in qualunque annata.
+  Un punto fuori dal comune dichiarato viene <strong>rifiutato</strong>.
+</div>
+
+<div class="mb-3">
+  <input type="search" id="filtro" class="form-control"
+         placeholder="Filtra per via, comune o CAP…" autocomplete="off">
+</div>
+
+<div class="table-responsive">
+  <table class="table table-sm table-hover align-middle">
+    <thead>
+      <tr>
+        <th style="width:5rem;" class="text-end">Alunni</th>
+        <th>Via scritta</th>
+        <th>Comune</th>
+        <th style="width:7rem;">CAP</th>
+        <th>Stato</th>
+        <th style="width:7rem;"></th>
+      </tr>
+    </thead>
+    <tbody id="corpo">
+      {% for r in righe %}
+      <tr data-cerca="{{ (r.via ~ ' ' ~ r.comune ~ ' ' ~ r.cap ~ ' ' ~ r.esempio)|lower }}">
+        <td class="text-end"><strong>{{ r.n }}</strong></td>
+        <td>
+          {{ r.esempio }}
+          {% if r.via and r.via|lower != r.esempio|lower %}
+            <div class="text-muted small">{{ r.via }}</div>
+          {% endif %}
+        </td>
+        <td>{{ r.comune or '—' }}</td>
+        <td class="text-muted small">{{ r.cap or '—' }}</td>
+        <td>
+          {% if r.proposta %}
+            <span class="badge bg-success-subtle text-success-emphasis">proposta</span>
+            {{ r.proposta }} <span class="text-muted small">({{ r.motivo }})</span>
+          {% elif r.ambigui %}
+            <span class="badge bg-warning-subtle text-warning-emphasis">ambigua</span>
+            <span class="text-muted small">{{ r.ambigui|join(' · ') }}</span>
+          {% else %}
+            <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ r.motivo }}</span>
+          {% endif %}
+        </td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-primary"
+             href="{{ url_for('revisione.gruppo', via=r.via, comune=r.comune) }}">Sistema</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const filtro = document.getElementById('filtro');
+  filtro.addEventListener('input', () => {
+    const q = filtro.value.trim().toLowerCase();
+    for (const tr of document.querySelectorAll('#corpo tr')) {
+      tr.hidden = q && !tr.dataset.cerca.includes(q);
+    }
+  });
+</script>
+{% endblock %}

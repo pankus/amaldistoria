@@ -149,7 +149,7 @@ def mapdata():
 
     school_markers = _get_school_markers(param)
 
-    # print(f"[mapdata] anno={param} punti={len(geo_rows)} studenti={studenti_nr}")
+    print(f"[mapdata] anno={param} punti={len(geo_rows)} studenti={studenti_nr}")
 
     return render_template('map_studenti.html',
                            params=params, param=param,
@@ -188,7 +188,7 @@ def mapdata_time():
         if coords:
             time_data[anno] = [[c[0], c[1]] for c in coords if c[0] and c[1]]
     school_markers = _get_all_school_markers()
-    # print(f"[mapdata_time] anni={len(time_data)} primo={list(time_data.keys())[:1]}")
+    print(f"[mapdata_time] anni={len(time_data)} primo={list(time_data.keys())[:1]}")
 
     return render_template('map_studenti_time.html',
                            time_data=time_data,
@@ -203,12 +203,14 @@ def map_graph():
               .distinct()
               .order_by(Alunno.anno_ref.desc())
               .all()]
-    param = request.form.get('anno') or '1992-1993'
+    # Default: l'anno piu' recente. params e' gia' ordinato in modo decrescente.
+    param = request.form.get('anno') or (params[0] if params else None)
 
     filters = _build_filters(request.form)
+    # Nessun filtro sull'indirizzo: la dashboard conta *tutti* gli iscritti
+    # dell'anno. La geocodifica decide solo chi finisce sulla mappa (vedi sotto).
     students_query = (Alunno.query
                       .filter(*([Alunno.anno_ref == param] + filters))
-                      .filter(Alunno.strade.any(Strada.geom.isnot(None)))
                       .options(selectinload(Alunno.strade))
                       .all())
 
@@ -228,30 +230,39 @@ def map_graph():
     data_genere = OrderedDict(Counter(s.sesso for s in students_query))
     data_indirizzo = OrderedDict(Counter(s.indirizzo_studi_norm for s in students_query))
     data_cap = OrderedDict(Counter(s.cap_residenza for s in students_query))
+    data_esito = OrderedDict(sorted(
+        Counter(s.esito_finale_norm or 'Non rilevato' for s in students_query).items(),
+        key=lambda v: v[1], reverse=True
+    ))
+    data_anno_corso = OrderedDict(sorted(
+        Counter(('%d° anno' % s.anno_sigla) if s.anno_sigla else 'Non rilevato'
+                for s in students_query).items()
+    ))
+
+    # Punti della mappa: ricavati dalla selezione corrente, cosi' la mappa segue
+    # i filtri della sidebar. Un alunno con due indirizzi mette due marker ma
+    # vale 1 nella copertura, che si conta per studente.
+    def _localizzato(strada):
+        return strada.geom is not None and strada.osm_lat and strada.osm_lon
 
     punti = [
-        [strada.osm_lat, strada.osm_lon, strada.osm_road]
+        [strada.osm_lat, strada.osm_lon, strada.osm_road or '']
         for student in students_query
         for strada in student.strade
-        if strada.geom is not None
+        if _localizzato(strada)
     ]
-    # Dati geo via SQL diretto
-    conn = db.engine.connect()
-    geo_rows = conn.execute(text("""
-        SELECT s.osm_lat, s.osm_lon, s.osm_road
-        FROM strada s
-        JOIN rel_alunno_strada ras ON ras.strada_id = s.id
-        JOIN alunni a ON a.id = ras.alunno_id
-        WHERE s.geom IS NOT NULL
-          AND s.osm_lat IS NOT NULL
-          AND s.osm_lon IS NOT NULL
-          AND a.anno_ref = :p
-    """), {"p": param}).fetchall()
-    heat_data    = [[r[0], r[1]] for r in geo_rows]
-    cluster_data = [{'lat': r[0], 'lon': r[1], 'road': r[2] or ''} for r in geo_rows]
+    heat_data    = [[p[0], p[1]] for p in punti]
+    cluster_data = [{'lat': p[0], 'lon': p[1], 'road': p[2]} for p in punti]
+
+    geocodificati = sum(1 for s in students_query
+                        if any(_localizzato(st) for st in s.strade))
+    senza_geo = alunni_filtered - geocodificati
+    copertura = round(100.0 * geocodificati / alunni_filtered, 1) if alunni_filtered else 0.0
+
     school_markers = _get_school_markers(param)
 
-    # print(f"[map_graph] anno={param} punti={len(geo_rows)} filtrati={alunni_filtered}")
+    print(f"[map_graph] anno={param} punti={len(punti)} filtrati={alunni_filtered} "
+          f"geocodificati={geocodificati} ({copertura}%)")
 
     return render_template('map_graph.html',
                            params=params, param=param, request=request.form,
@@ -262,8 +273,13 @@ def map_graph():
                            chart_genere=data_genere,
                            chart_indirizzo=data_indirizzo,
                            chart_cap=data_cap,
+                           chart_esito=data_esito,
+                           chart_anno_corso=data_anno_corso,
                            iscritti=iscritti,
                            alunni_filtered=alunni_filtered,
+                           geocodificati=geocodificati,
+                           senza_geo=senza_geo,
+                           copertura=copertura,
                            heat_data=heat_data,
                            cluster_data=cluster_data,
                            school_markers=school_markers)

@@ -1,6 +1,6 @@
 from flask import redirect, url_for, flash
 from flask_login import current_user
-from flask_admin import Admin, expose, AdminIndexView
+from flask_admin import Admin, AdminIndexView
 from flask_admin.menu import MenuLink
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.form import SecureForm, rules
@@ -13,10 +13,10 @@ from shapely.geometry import Point
 
 
 class HomeView(AdminIndexView):
-    @expose('/')
-    def admin_index(self):
-        return redirect(url_for('main.index'))
-
+    # Niente override di admin_index: rimandava a `main.index` sempre, per
+    # qualunque ruolo, e siccome l'unico ingresso al pannello e' l'`/admin`
+    # del menu utente in base.html, il pannello era irraggiungibile. Qui resta
+    # la pagina indice di Flask-Admin, che e' il menu delle viste.
     def is_accessible(self):
         return current_user.is_authenticated and current_user.role in ['adm', 'adv']
 
@@ -190,15 +190,16 @@ class StradaAdmin(ModelView):
     column_searchable_list = ['osm_road', 'osm_city', 'osm_postcode']
     column_filters = ['alunni_nr', 'osm_city', 'osm_postcode', 'osm_type']
 
-    form_columns = ['osm_road', 'osm_house_number', 'osm_house_number_dev',
-                    'osm_postcode', 'osm_suburb', 'osm_city', 'osm_type',
-                    'osm_lat', 'osm_lon']
+    # Niente civico: si geocodifica la via, mai la casa. Le colonne restano
+    # in tabella per lo storico ma non si compilano piu' da nessuna parte
+    # (`strade-cleanup` le ha azzerate su tutto l'archivio).
+    form_columns = ['osm_road', 'osm_postcode', 'osm_suburb', 'osm_city',
+                    'osm_type', 'osm_lat', 'osm_lon']
 
     form_create_rules = [
         rules.FieldSet(('address_search', 'selected_address'), 'Cerca indirizzo'),
         rules.FieldSet((
-            'osm_road', 'osm_house_number', 'osm_house_number_dev',
-            'osm_postcode', 'osm_suburb', 'osm_city', 'osm_type',
+            'osm_road', 'osm_postcode', 'osm_suburb', 'osm_city', 'osm_type',
             'osm_lat', 'osm_lon'
         ), 'Dettagli indirizzo')
     ]
@@ -222,11 +223,17 @@ class StradaAdmin(ModelView):
         return form_class
 
     def check_duplicate(self, form):
+        """Doppione = stessa via, stesso CAP, stesso comune.
+
+        Il comune serve: 'Via Casilina' col medesimo CAP esiste davvero a Roma
+        e a Monte Compatri, sono due punti diversi, e senza questo confronto il
+        pannello rifiutava di creare il secondo.
+        """
         return self.session.query(self.model).filter(
             and_(
                 self.model.osm_road == form.osm_road.data,
-                self.model.osm_house_number == form.osm_house_number.data,
                 self.model.osm_postcode == form.osm_postcode.data,
+                self.model.osm_city == form.osm_city.data,
             )
         ).first()
 
@@ -238,8 +245,8 @@ class StradaAdmin(ModelView):
                     warning_msg = Markup(
                         f'<strong>Attenzione!</strong> Un indirizzo con questi dettagli esiste già:<br>'
                         f'Via: {duplicate.osm_road}<br>'
-                        f'Numero: {duplicate.osm_house_number}<br>'
                         f'CAP: {duplicate.osm_postcode}<br>'
+                        f'Comune: {duplicate.osm_city}<br>'
                         f'Quartiere: {duplicate.osm_suburb}<br><br>'
                         f'Modifica i dati o seleziona un altro indirizzo.'
                     )
@@ -248,12 +255,13 @@ class StradaAdmin(ModelView):
 
                 model = self.model()
                 form_fields = [
-                    'osm_road', 'osm_house_number', 'osm_house_number_dev',
-                    'osm_postcode', 'osm_suburb', 'osm_city', 'osm_type',
-                    'osm_lat', 'osm_lon'
+                    'osm_road', 'osm_postcode', 'osm_suburb', 'osm_city',
+                    'osm_type', 'osm_lat', 'osm_lon'
                 ]
                 for field in form_fields:
                     setattr(model, field, getattr(form, field).data)
+                model.osm_house_number = None
+                model.osm_house_number_dev = None
 
                 if model.osm_lat and model.osm_lon:
                     point = Point(float(model.osm_lon), float(model.osm_lat))

@@ -66,7 +66,12 @@ class User(UserMixin, db.Model):
 rel_alunno_strada = db.Table(
     'rel_alunno_strada',
     db.Column('alunno_id', db.ForeignKey('alunni.id'), primary_key="True"),
-    db.Column('strada_id', db.ForeignKey('strada.id'), primary_key="True")
+    db.Column('strada_id', db.ForeignKey('strada.id'), primary_key="True"),
+    # Collegamento deciso a mano contro il vincolo di comune: il punto cade
+    # fuori dal confine ISTAT dichiarato dall'alunno. Non e' un errore da
+    # correggere ma una decisione da poter rileggere, quindi `audit-geo` la
+    # elenca a parte e `--scollega` non la tocca.
+    db.Column('forzato', db.Boolean, nullable=False, server_default='false')
 )
 
 class Alunno(db.Model):
@@ -212,3 +217,29 @@ class Strada(db.Model):
         if self.osm_house_number and self.osm_house_number != 'empty':
             return f"{self.osm_road} ({self.osm_house_number}), {self.osm_postcode}, {self.osm_city}"
         return f"{self.osm_road}, {self.osm_postcode}, {self.osm_city}"
+
+
+class Stradario(db.Model):
+    """Elenco delle vie reali della Citta Metropolitana di Roma, da OpenStreetMap.
+
+    Serve a espandere le abbreviazioni della segreteria ("VIA G. LONGHI") contro
+    denominazioni vere prima di interrogare Nominatim, che su una via abbreviata
+    non risolve. Popolata da `flask stradario-sync`; una riga per (nome, comune),
+    con il baricentro dei way che portano quel nome.
+    """
+    __tablename__ = "stradario"
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(256), nullable=False)
+    nome_norm = db.Column(db.String(256), nullable=False, index=True)
+    comune = db.Column(db.String(128), index=True)
+    geom = db.Column(Geometry(geometry_type='POINT', srid=4326))
+    osm_ids = db.Column(db.Integer)          # quanti way sono confluiti nella riga
+    data_update = db.Column(db.DateTime(), default=datetime.utcnow,
+                            onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('nome', 'comune', name='uq_stradario_nome_comune'),
+    )
+
+    def __repr__(self):
+        return f"{self.nome} ({self.comune})"

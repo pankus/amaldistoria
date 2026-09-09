@@ -7,6 +7,7 @@ Create Date: ${create_date}
 """
 from alembic import op
 import sqlalchemy as sa
+import geoalchemy2          # serve alle colonne `geom`; lascialo anche se inutilizzato
 ${imports if imports else ""}
 
 # revision identifiers, used by Alembic.

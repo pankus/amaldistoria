@@ -26,9 +26,16 @@ def create_app(config_class=Config):
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
+    from app.revisione import bp as revisione_bp
+    app.register_blueprint(revisione_bp)
+
     # Configura Flask-Admin
     from app.admin_views import configure_admin
     configure_admin(app, db)
+
+    # Comandi CLI di import e geocodifica
+    from app.importer import registra_cli
+    registra_cli(app)
 
     # Debug toolbar (solo in sviluppo)
     if app.config.get('DEBUG'):

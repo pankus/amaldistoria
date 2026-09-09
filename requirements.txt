@@ -24,6 +24,7 @@ SQLAlchemy==1.4.54
 Flask-Migrate==3.1.0
 GeoAlchemy2==0.14.7
 psycopg2==2.9.10
+shapely==2.1.2       # usata da admin_views.py e dall'importer per costruire i punti PostGIS
 
 # Auth & Forms
 Flask-Login==0.6.3
@@ -48,6 +49,7 @@ geographiclib==2.0
 # Data
 pandas==2.2.3
 numpy==1.26.4
+xlrd==2.0.1          # lettura dei .xls (BIFF8) esportati da Spaggiari/Infoschool
 
 # Viz
 plotly==5.24.1

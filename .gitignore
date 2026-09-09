@@ -1,7 +1,12 @@
-venv
-.env
+.venv/
+venv/
 .flaskenv
 _amaldi.conf
+__pycache__/
 *.pyc
-__pycache__
 .python-version
+.DS_Store
+
+# dati della segreteria e cache geo: mai versionati
+data/*
+!data/README.md
