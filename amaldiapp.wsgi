@@ -5,7 +5,7 @@ import logging
 
 logging.basicConfig(stream=sys.stderr)
 # server produzione
-activate_this = '/var/www/amaldistoria_dev/venv/bin/activate_this.py'
+activate_this = '/var/www/amaldistoria_dev/.venv/bin/activate_this.py'
 
 # for Python3
 with open(activate_this) as file_:
