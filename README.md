@@ -172,7 +172,9 @@ flask run
 ```
 
 Per caricare i dati degli studenti e geolocalizzarli, vedi
-[Caricare i dati di un nuovo anno scolastico](#caricare-i-dati-di-un-nuovo-anno-scolastico).
+[Caricare i dati di un nuovo anno scolastico](#caricare-i-dati-di-un-nuovo-anno-scolastico);
+per l'elenco completo di comandi, opzioni e controlli, [Gli strumenti
+interni](#gli-strumenti-interni).
 
 **Nota sull'ambiente Python:** se `pip` non è disponibile dentro `.venv`, si può usare
 [uv](https://github.com/astral-sh/uv):
@@ -248,6 +250,16 @@ flask geocode --anno 2024-2025
 È il passo più lento: interroga un servizio pubblico di geolocalizzazione rispettandone
 i limiti d'uso (una richiesta al secondo), quindi per una annata intera possono volerci
 15-25 minuti. Non spegnere il computer nel frattempo.
+
+**Conviene provare prima su poco.** Aggiungendo `--limite 20` il comando si ferma dopo
+venti indirizzi: in un minuto si vede se le correzioni automatiche hanno senso, invece di
+scoprirlo dopo venti. Poi si rilancia senza `--limite` per fare sul serio — quello che era
+già stato collegato non viene rifatto.
+
+```bash
+flask geocode --anno 2024-2025 --limite 20     # prova
+flask geocode --anno 2024-2025                 # per davvero
+```
 
 A fine lavoro stampa un riepilogo di questo tipo:
 
@@ -378,6 +390,238 @@ territorio senza rendere rintracciabile dove abita un singolo studente.
 
 Questa regola vale anche all'indietro: i 170 indirizzi storici che erano stati
 geolocalizzati sulla casa esatta sono stati riportati sulla via.
+
+---
+
+### Perché il programma è cambiato a settembre 2026
+
+Questa parte non serve a usare il programma: serve a capire **perché è fatto così**. Sono
+sei episodi, e ognuno ha in comune la stessa cosa — l'errore non si vedeva a occhio. Si è
+visto contandolo.
+
+**La riga vuota che gonfiava le statistiche.** In archivio c'era una via senza nome e
+senza posizione sulla mappa, usata anni prima come segnaposto per «indirizzo non
+risolto». Con gli anni ci si erano appoggiati **3.570 studenti**. In ogni statistica
+risultavano geolocalizzati, ma non avevano un punto: la copertura dichiarata era più alta
+di quella vera. La riga è stata eliminata e quegli studenti rigeocodificati da capo. Se
+si confrontano i numeri di copertura di prima e di dopo settembre 2026, questo è il
+motivo per cui non tornano.
+
+**Le omonimie messe a mano negli anni.** Il comando `flask audit-geo` è nato per
+rispondere a una domanda sola: *ogni studente è dentro il comune che ha dichiarato?* La
+prima volta che è stato lanciato ha trovato **891 collegamenti nel comune sbagliato**, su
+67 vie diverse:
+
+```
+134 studenti  Via Santa Rita da Cascia   → puntati a Pomezia
+105 studenti  Via Anteo                  → puntati ad Anzio
+ 48 studenti  Via dei Giardinetti        → puntati a Nerola
+```
+
+Erano stati fatti uno alla volta, negli anni, e preso singolarmente **ognuno sembrava
+giusto**: la via col nome esatto esiste davvero, solo in un altro comune.
+
+**Il riuso che non guardava il comune.** Quando un indirizzo era già in archivio, il
+programma lo riutilizzava senza interrogare internet — giusto, è il caso più frequente e
+il più veloce. Ma per riconoscerlo bastava che il nome della via e il CAP combaciassero:
+**132 collegamenti sbagliati**, fra cui 17 studenti romani finiti sulla *Via Casilina* di
+Monte Compatri, che è una via davvero a cavallo dei due comuni. Da qui la regola di oggi:
+una via è identificata da **(nome, CAP, comune)**, e il comune è quello che *contiene il
+punto sulla mappa*, non il nome di città che risponde il servizio di geolocalizzazione —
+che a volte sbaglia, e la *Via Osini* di Monte Compatri era salvata come «Roma».
+
+**Il ban che fece sparire Roma.** La primissima versione dello stradario interrogava un
+servizio pubblico di interrogazione delle mappe, un comune per volta: una quarantina di
+richieste pesanti in fila. Il servizio ha cominciato a rifiutarle, poi ha bloccato
+l'indirizzo IP. Si perse Roma — che da sola vale il **97,3%** degli indirizzi — e il
+comando **terminò senza segnalare alcun errore**, come se fosse andato tutto bene. Da lì
+la scelta di oggi: scaricare le due sorgenti *per intero* invece di interrogarle a pezzi.
+Nessun limite di frequenza, nessun blocco possibile, e lo stesso identico risultato a
+ogni esecuzione. È il motivo per cui i file scaricati sono grossi (~750 MB) e restano in
+cache.
+
+**I 100 metri di tolleranza sul confine.** Di una via si salva **il punto centrale**. Se
+la strada corre lungo il confine fra due comuni, quel punto può cadere dall'altra parte:
+i due punti di *Via Torre dello Stinco* — che per la segreteria, per OpenStreetMap e per
+chiunque è a Roma — stanno **0,4 m** e **30 m** dentro Frascati. Senza un margine di
+tolleranza erano irrecuperabili, e 17 studenti restavano bloccati senza alcuna via
+d'uscita. Il margine è di 100 metri. Le omonimie vere, che sono l'errore da fermare,
+stanno a chilometri e continuano a essere rifiutate — verificato su Nerola, Anzio e
+Pomezia. **Alzare quella soglia le fa rientrare tutte**: è un numero che non si tocca
+senza rifare quella prova.
+
+**Le forzature si registrano, non si nascondono.** Il vincolo sul comune si può
+scavalcare a mano — i bottoni «Collega comunque» / «Crea comunque» — perché il caso
+legittimo esiste: il comune scritto dalla segreteria può essere **sbagliato**, e una via
+può stare davvero a cavallo del confine oltre i 100 metri. *Via Aci Platani*, che ogni
+fonte descrive come romana, ha il punto 145 m dentro Frascati. Ma la forzatura viene
+**marcata in archivio**: il messaggio lo dice, `audit-geo` la elenca in una sezione a
+parte, e `audit-geo --scollega` non la rimuove. Senza quella marcatura, il primo controllo
+automatico avrebbe cancellato in silenzio tutto il lavoro deciso a mano.
+
+---
+
+### Gli strumenti interni
+
+Tutto quello che il progetto sa fare da riga di comando, con le opzioni che contano. Ogni
+comando va lanciato dalla cartella del progetto con l'ambiente attivo (`source
+.venv/bin/activate`, il prompt mostra `(.venv)`).
+
+#### I cinque comandi
+
+| comando | opzioni | quando si usa |
+|---|---|---|
+| `flask stradario-sync` | `--riscarica` | la prima volta, poi una volta l'anno |
+| `flask import-alunni <file>` | `--anno`, `--dry-run` | a ogni annata nuova |
+| `flask geocode` | `--anno`, `--tutti`, `--limite N` | dopo ogni import |
+| `flask audit-geo` | `--scollega` | dopo ogni geocodifica, e ogni tanto |
+| `flask strade-cleanup` | `--dry-run` | una tantum, già eseguito |
+
+A cosa servono le opzioni:
+
+- **`--dry-run`** — fa vedere cosa succederebbe **senza scrivere niente** in archivio.
+  Serve a guardare prima di agire, e non fa mai danni.
+- **`--limite 20`** — su `geocode`, si ferma dopo venti indirizzi. Un minuto invece di
+  venti, per capire se sta andando bene.
+- **`--anno 2024-2025`** — l'anno scolastico. Su `import-alunni` serve solo quando il
+  nome del file non lo contiene; di norma il programma lo legge da lì.
+- **`--tutti`** — su `geocode`, lavora su tutte le annate che hanno studenti ancora non
+  collegati, invece di una sola.
+- **`--riscarica`** — su `stradario-sync`, riscarica le mappe anche se sono già in cache.
+- **`--scollega`** — su `audit-geo`, è **l'unica opzione che cancella qualcosa**: rimuove
+  i collegamenti risultati nel comune sbagliato. Non tocca quelli forzati a mano. Senza
+  questa opzione, `audit-geo` si limita a guardare e riferire.
+
+#### Le mappe si scaricano da sole
+
+Domanda che si fa chiunque riprenda il progetto: **no, non c'è niente da scaricare a
+mano.** `flask stradario-sync` guarda in `data/geo/`, e scarica solo quello che manca:
+
+| sorgente | cosa contiene | dimensione |
+|---|---|---|
+| Geofabrik (OpenStreetMap) | le strade del Centro Italia | ~750 MB |
+| ISTAT | i confini dei comuni | ~12 MB |
+
+Il download è protetto contro le interruzioni: il file arriva con un nome provvisorio e
+viene rinominato solo alla fine, dopo aver controllato che sia arrivato per intero. Se la
+connessione cade a metà, il lancio successivo ricomincia invece di usare un file
+troncato.
+
+`data/geo/` è **solo una cache**: se occupa troppo spazio o si sospetta che sia rovinata,
+si può cancellare tranquillamente e rilanciare `flask stradario-sync`.
+
+#### I controlli dopo un import
+
+Sono query da incollare in `psql` (`psql amaldi_dev` dal terminale) o in pgAdmin.
+**Nessuna delle prime tre deve tornare un numero diverso da zero.**
+
+```sql
+-- 1. Civici salvati per errore: violerebbe la regola di privacy.
+select count(*) from strada where osm_house_number is not null
+   and osm_house_number not in ('', 'empty');
+
+-- 2. Doppioni sulla chiave (via, CAP, comune).
+--    Il comune e' quello che contiene il punto: osm_city riporta quel che dice
+--    il servizio di geolocalizzazione, e a volte sbaglia.
+select count(*) from (select s.osm_road, coalesce(s.osm_postcode,''), coalesce(c.comune,'')
+   from strada s left join istat_comuni c on ST_Contains(c.geom, s.geom)
+   group by 1,2,3 having count(*)>1) t;
+
+-- 3. Vie senza posizione: un collegamento a una di queste mette lo studente
+--    da nessuna parte, ed e' l'errore che nel 2026 gonfiava le statistiche.
+select count(*) from strada where geom is null;
+```
+
+La quarta invece è un **confronto**, non un controllo: la copertura per annata va letta
+accanto a quella dell'import precedente. Se crolla, qualcosa è andato storto.
+
+```sql
+select anno_ref, count(*) as alunni,
+  count(*) filter (where exists (select 1 from rel_alunno_strada r where r.alunno_id = a.id)) as geo
+from alunni a group by 1 order by 1;
+```
+
+Le forzature, infine, **si contano e si leggono — non si azzerano**: sono decisioni prese
+guardando il caso, non errori da ripulire.
+
+```sql
+select s.osm_road, a.comune_residenza, count(*)
+from rel_alunno_strada r
+join strada s on s.id = r.strada_id
+join alunni a on a.id = r.alunno_id
+where r.forzato group by 1,2 order by 3 desc;
+```
+
+#### La pagina Revisione indirizzi
+
+È dove si smaltisce a mano quello che il programma non ha voluto indovinare. Sta nel menù
+utente in alto a destra, visibile agli amministratori. Lavora **per via**, non per
+studente: decidere una volta su `VIA RADDUSA` sistema tutti gli studenti di tutte le
+annate che hanno scritto quell'indirizzo.
+
+Aperto un caso, si trovano **quattro card numerate**. Non sono quattro modi di fare la
+stessa cosa: sono quattro fonti, in ordine di affidabilità **decrescente**.
+
+| | fonte | perché in quest'ordine |
+|---|---|---|
+| 1 | già in archivio | riusa un punto che c'è già, invece di crearne un doppione: è sempre la scelta migliore |
+| 2 | vie reali del comune | vengono dallo stradario ufficiale, filtrate sul comune dichiarato |
+| 3 | ricerca su internet | va guardata: il servizio, se non trova la via nel comune chiesto, propone l'omonima altrove |
+| 4 | punto a mano sulla mappa | ultima risorsa, quando la via non esiste in nessuna fonte |
+
+Accanto a ogni risultato della card 3 c'è un **badge con la distanza**, ed è lì che si
+capisce a colpo d'occhio con cosa si ha a che fare: 145 m vuol dire *via di confine, forse
+è giusta*; 658 km vuol dire *un'altra provincia, è l'omonimia sbagliata*.
+
+I candidati sono divisi fra quelli che una regola riconosce davvero come la stessa via e
+quelli che hanno solo qualche parola in comune — questi ultimi stanno in un blocco chiuso.
+Non è una raffinatezza estetica: cercando `LAGO DI BOLSENA` il programma propone anche
+*Via Lago di Bracciano*, e in una lista piatta l'errore finirebbe sotto il primo bottone.
+
+#### Guardare dentro l'archivio senza scrivere SQL
+
+```bash
+flask shell
+```
+
+Apre una console Python con dentro già pronti `db`, `User`, `Alunno`, `Indirizzo` e
+`Strada`: non serve importare niente.
+
+```python
+>>> Alunno.query.filter_by(anno_ref='2024-2025').count()
+2082
+
+>>> v = Strada.query.filter(Strada.osm_road.ilike('%Raddusa%')).first()
+>>> v.osm_road, v.osm_city, v.alunni_nr
+('Via Raddusa', 'Roma', 45)
+```
+
+Si esce con `exit()`.
+
+#### La verifica automatica
+
+```bash
+python test_toponimi.py
+```
+
+È l'unico test del progetto: dodici controlli, un secondo. Verifica che il
+riconoscimento degli indirizzi (`app/toponimi.py`) continui a fare quello che deve — e
+soprattutto che continui a **non** fare quello che non deve.
+
+Va rilanciato dopo ogni modifica a quel file. I casi che contiene sono indirizzi veri,
+presi dai file della segreteria, non esempi inventati: `VIA G. LONGHI`, `MONTEMILITTO`,
+`ROCCA MORICE`. Chi allarga una regola scrive **prima il caso negativo** — la coppia che
+*non* deve agganciare — e poi la regola. È il modo in cui si evita di tornare ad
+accoppiare `LONGI` con `LONGO`.
+
+#### Quando qualcosa va storto
+
+| situazione | cosa fare |
+|---|---|
+| l'import si è interrotto a metà | rilanciare lo stesso comando: salta le righe già inserite, non crea doppioni |
+| la geocodifica ha prodotto molti errori | `flask audit-geo --scollega` per rimuovere quelli sbagliati, poi `flask geocode --tutti` per rifarli |
+| `data/geo/` occupa troppo spazio, o sembra rovinata | cancellarla e rilanciare `flask stradario-sync`: è solo cache |
+| un indirizzo non si riesce proprio a collocare | lasciarlo in coda. Meglio un caso irrisolto che uno studente sulla mappa nel posto sbagliato |
 
 ### Configurazione PostgreSQL/PostGIS
 
@@ -582,6 +826,32 @@ an orthophoto backdrop. Subsequent imports reuse it on their own.
 
 The full step-by-step walkthrough, written for non-technical users, is in the Italian
 section above and in [`data/README.md`](data/README.md).
+
+### Internal tooling
+
+| command | options | when |
+|---|---|---|
+| `flask stradario-sync` | `--riscarica` | first run, then once a year |
+| `flask import-alunni <file>` | `--anno`, `--dry-run` | every new school year |
+| `flask geocode` | `--anno`, `--tutti`, `--limite N` | after every import |
+| `flask audit-geo` | `--scollega` | after every geocode |
+| `flask strade-cleanup` | `--dry-run` | one-off, already done |
+
+`--dry-run` shows what would happen without writing; `--limite 20` trial-runs the
+geocoder on twenty addresses instead of waiting twenty minutes; `--scollega` is the only
+option that deletes anything (wrong-town links, never the manually forced ones).
+
+Beyond the CLI: `flask shell` opens a Python console with `db`, `User`, `Alunno`,
+`Indirizzo` and `Strada` preloaded, and `python test_toponimi.py` is the project's single
+automated check — twelve assertions over the address normaliser, to be re-run after every
+change to `app/toponimi.py`.
+
+Two Italian sections above cover the rest: **«Perché il programma è cambiato a settembre
+2026»** tells what was actually broken and how much it weighed — 3.570 students counted
+as geocoded while sitting on an empty placeholder row, 891 historical links in the wrong
+town, an Overpass ban that silently dropped Rome (97,3% of all addresses) while exiting
+with status 0 — and **«Gli strumenti interni»** is the reference for every command, the
+post-import SQL checks, and the review page.
 
 ### PostgreSQL/PostGIS setup
 

@@ -1,4 +1,5 @@
-from flask import render_template, request, jsonify, flash, redirect, url_for
+from flask import (render_template, request, jsonify, flash, redirect, url_for,
+                   current_app)
 from flask_login import login_required, current_user
 from sqlalchemy.sql import text
 from sqlalchemy.orm import joinedload, selectinload
@@ -149,7 +150,8 @@ def mapdata():
 
     school_markers = _get_school_markers(param)
 
-    print(f"[mapdata] anno={param} punti={len(geo_rows)} studenti={studenti_nr}")
+    current_app.logger.debug("[mapdata] anno=%s punti=%s studenti=%s",
+                             param, len(geo_rows), studenti_nr)
 
     return render_template('map_studenti.html',
                            params=params, param=param,
@@ -188,7 +190,8 @@ def mapdata_time():
         if coords:
             time_data[anno] = [[c[0], c[1]] for c in coords if c[0] and c[1]]
     school_markers = _get_all_school_markers()
-    print(f"[mapdata_time] anni={len(time_data)} primo={list(time_data.keys())[:1]}")
+    current_app.logger.debug("[mapdata_time] anni=%s primo=%s",
+                             len(time_data), list(time_data.keys())[:1])
 
     return render_template('map_studenti_time.html',
                            time_data=time_data,
@@ -261,8 +264,9 @@ def map_graph():
 
     school_markers = _get_school_markers(param)
 
-    print(f"[map_graph] anno={param} punti={len(punti)} filtrati={alunni_filtered} "
-          f"geocodificati={geocodificati} ({copertura}%)")
+    current_app.logger.debug(
+        "[map_graph] anno=%s punti=%s filtrati=%s geocodificati=%s (%s%%)",
+        param, len(punti), alunni_filtered, geocodificati, copertura)
 
     return render_template('map_graph.html',
                            params=params, param=param, request=request.form,
