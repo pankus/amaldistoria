@@ -23,26 +23,32 @@
   </div>
 </div>
 
-{# Macro per materiale: il testo arriva dal caller, il media dalla colonna laterale #}
-{% macro materiale(etichetta, titolo, link, azione, flip=false, id=none) %}
+{# Macro per materiale: il testo arriva dal caller, il media dalla colonna accanto.
+   Il media ha di norma più spazio del testo; testo=7 inverte le proporzioni. #}
+{% macro materiale(etichetta, titolo, link, azione, flip=false, id=none, testo=5) %}
 <hr style="border-color:var(--c-border-lt);" class="my-4">
 <div class="row align-items-center g-4" {% if id %}id="{{ id }}" style="scroll-margin-top:90px;"{% endif %}>
-  <div class="col-md-7 {% if flip %}order-md-2{% endif %}">
+  <div class="col-md-{{ testo }} {% if flip %}order-md-2{% endif %}">
     <span class="section-label">{{ etichetta }}</span>
     <h2 class="featurette-heading mt-1">{{ titolo }}</h2>
     {{ caller('testo') }}
+    {% if link %}
     <a class="btn btn-outline-primary mt-2" target="_blank" rel="noopener" href="{{ link }}" {% if link.startswith('/') %}download{% endif %}>{{ azione }}</a>
+    {% endif %}
   </div>
-  <div class="col-md-5 {% if flip %}order-md-1{% endif %}">
+  <div class="col-md-{{ 12 - testo }} {% if flip %}order-md-1{% endif %}">
     {{ caller('media') }}
   </div>
 </div>
 {% endmacro %}
 
 {% set cornice = "border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow);" %}
+{# ID YouTube del documentario: finché è none si vede il segnaposto "Video in arrivo" #}
+{% set youtube_documentario = none %}
 
 {% call(parte) materiale("Documentario · 2024", "Un liceo di periferia. Storie e voci dell'Amaldi (1989-2024)",
-    "https://drive.google.com/file/d/1YR7Pzu1cGUCq4RA1--uUrksjgMeLS2TL/view", "Guarda il video") %}
+    ("https://www.youtube.com/watch?v=" ~ youtube_documentario) if youtube_documentario else none,
+    "Guarda su YouTube", testo=7) %}
   {% if parte == 'testo' %}
     <p class="prose">
       Un documentario, della durata di circa 20 minuti, costruito con le voci di chi ha vissuto l'Amaldi come
@@ -60,10 +66,21 @@
       audiovisivo del 2007.
     </p>
   {% else %}
+    {% if youtube_documentario %}
     <div class="ratio ratio-16x9" style="{{ cornice }}">
-      <iframe src="https://drive.google.com/file/d/1YR7Pzu1cGUCq4RA1--uUrksjgMeLS2TL/preview"
-              title="Un liceo di periferia" allow="autoplay" allowfullscreen></iframe>
+      <iframe src="https://www.youtube.com/embed/{{ youtube_documentario }}"
+              title="Un liceo di periferia"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
     </div>
+    {% else %}
+    <div class="ratio ratio-16x9" style="{{ cornice }}background:var(--c-ink);">
+      <div class="d-flex flex-column align-items-center justify-content-center text-center" style="color:#d0d5dd;">
+        <i class="bi bi-camera-reels" style="font-size:2.4rem;color:var(--c-accent-lt);"></i>
+        <span class="mt-2" style="font-weight:600;">Video in arrivo</span>
+      </div>
+    </div>
+    {% endif %}
   {% endif %}
 {% endcall %}
 
@@ -82,13 +99,19 @@
       documentazione raccolta, intrecciando la città reale con quella immaginata.
     </p>
   {% else %}
-    <div style="{{ cornice }}background:#fff;">
-      <canvas id="opuscolo" class="d-block w-100" role="img" aria-label="Opuscolo, pagina 1"></canvas>
-    </div>
-    <div class="d-flex justify-content-center align-items-center gap-3 mt-2">
-      <button type="button" class="btn btn-sm btn-outline-secondary" id="opuscolo-prec" aria-label="Pagina precedente">&lsaquo;</button>
-      <span id="opuscolo-pagina" style="color:var(--c-muted);font-size:.9rem;">1 / …</span>
-      <button type="button" class="btn btn-sm btn-outline-secondary" id="opuscolo-succ" aria-label="Pagina successiva">&rsaquo;</button>
+    <div id="opuscolo-viewer" class="opuscolo-viewer">
+      <div class="opuscolo-foglio" style="{{ cornice }}">
+        <canvas id="opuscolo" class="d-block" role="img" aria-label="Opuscolo, pagina 1"></canvas>
+      </div>
+      <div class="opuscolo-barra d-flex justify-content-center align-items-center gap-3 mt-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="opuscolo-prec" aria-label="Pagina precedente">&lsaquo;</button>
+        <span id="opuscolo-pagina">1 / …</span>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="opuscolo-succ" aria-label="Pagina successiva">&rsaquo;</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="opuscolo-pieno"
+                aria-label="Sfoglia a tutto schermo" aria-pressed="false">
+          <i class="bi bi-arrows-fullscreen"></i>
+        </button>
+      </div>
     </div>
   {% endif %}
 {% endcall %}
@@ -123,16 +146,35 @@
       Ufficio di Scopo Politiche Giovanili
     </small></p>
   {% else %}
-    <img src="{{ url_for('static', filename='img/materiali/torbellatalk.webp') }}"
-         alt="Copertina del podcast TorBellaTalk: tra torri e parole"
-         class="img-fluid mb-3" style="{{ cornice }}">
-    <iframe src="https://archive.org/embed/3.-un-quartiere-in-trasformazione?playlist=1"
-            title="TorBellaTalk — puntate" width="100%" height="360" frameborder="0" allowfullscreen></iframe>
+    {# stessa card "On Air" della homepage: il nero del player diventa parte del disegno #}
+    <div class="onair">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="onair-cover" style="width:110px;">
+          <span class="onair-vinyl" aria-hidden="true"></span>
+          <img src="{{ url_for('static', filename='img/materiali/torbellatalk.webp') }}"
+               alt="Copertina del podcast TorBellaTalk: tra torri e parole">
+        </div>
+        <div>
+          <span class="onair-live"><span class="onair-live-dot"></span>On air</span>
+          <p class="onair-title">TorBellaTalk</p>
+          <p class="onair-sub">tra torri e parole</p>
+        </div>
+      </div>
+      <span class="onair-stamp mb-3" style="white-space:nowrap;">
+        <i class="bi bi-award-fill"></i>
+        Vincitore · <em>Voci dalla Città</em> · I edizione
+      </span>
+      <div style="border-radius:var(--radius-md);overflow:hidden;background:#000;">
+        <iframe src="https://archive.org/embed/3.-un-quartiere-in-trasformazione?playlist=1"
+                title="TorBellaTalk — puntate" width="100%" height="300" frameborder="0"
+                class="d-block" allowfullscreen></iframe>
+      </div>
+    </div>
   {% endif %}
 {% endcall %}
 
 {% call(parte) materiale("Podcast · 2026", "GenerAIzione in movimento",
-    "https://drive.google.com/drive/folders/1OPBOax5XZVRZqR8jjhmMY_YPIUb7gef-?usp=drive_link", "Cartella Drive", flip=true) %}
+    none, none, flip=true) %}
   {% if parte == 'testo' %}
     <p class="prose">
       Nel 2026, studenti e studentesse hanno lavorato sul sonoro analizzando fonti orali conservate nel Centro
@@ -143,25 +185,124 @@
       succursale di Castelverde.
     </p>
   {% else %}
-    {% for titolo, durata, file in [
-         ("La nostra generazione", "10:56", "la-nostra-generazione.mp3"),
-         ("Mobilità", "9:06", "mobilita.m4a"),
-         ("Storia della scuola", "11:23", "storia-della-scuola.mp3"),
-         ("Storia del territorio", "8:37", "storia-del-territorio.mp3")] %}
-      <div class="mb-3">
-        <div class="d-flex justify-content-between" style="font-size:.9rem;">
-          <strong>{{ loop.index }}. {{ titolo }}</strong>
-          <span style="color:var(--c-muted);">{{ durata }}</span>
+    {# un solo <audio> nascosto guidato dalla scaletta: stessa card "On Air" di TorBellaTalk #}
+    <div class="onair gen" id="gen">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="gen-disco" aria-hidden="true"><span>AI</span></div>
+        <div>
+          <span class="onair-live"><span class="onair-live-dot"></span><span id="gen-stato">4 puntate</span></span>
+          <p class="onair-title">GenerAIzione</p>
+          <p class="onair-sub">in movimento</p>
         </div>
-        <audio controls preload="none" class="w-100" src="{{ url_for('static', filename='data/' ~ file) }}"
-               aria-label="Puntata {{ loop.index }}: {{ titolo }}"></audio>
       </div>
-    {% endfor %}
+
+      <div class="gen-ora">
+        <button type="button" class="gen-play" id="gen-play" aria-label="Riproduci">
+          <i class="bi bi-play-fill"></i>
+        </button>
+        <div class="flex-grow-1 min-w-0">
+          <div class="d-flex justify-content-between align-items-baseline gap-2">
+            <span class="gen-titolo" id="gen-titolo">Scegli una puntata</span>
+            <span class="gen-tempo" id="gen-tempo">0:00</span>
+          </div>
+          <input type="range" class="gen-barra" id="gen-barra" min="0" max="0" step="1" value="0"
+                 aria-label="Posizione nella puntata" disabled>
+        </div>
+      </div>
+
+      <div class="onair-eq gen-eq" aria-hidden="true">
+        {% for i in range(40) %}<span style="animation-delay:-{{ (i * 137) % 1000 }}ms"></span>{% endfor %}
+      </div>
+
+      <ol class="gen-lista">
+        {% for titolo, durata, file in [
+             ("La nostra generazione", "10:56", "la-nostra-generazione.mp3"),
+             ("Mobilità", "9:06", "mobilita.m4a"),
+             ("Storia della scuola", "11:23", "storia-della-scuola.mp3"),
+             ("Storia del territorio", "8:37", "storia-del-territorio.mp3")] %}
+        <li>
+          <button type="button" class="gen-traccia" data-src="{{ url_for('static', filename='data/' ~ file) }}"
+                  aria-label="Ascolta la puntata {{ loop.index }}: {{ titolo }}">
+            <span class="gen-n">{{ loop.index }}</span>
+            <span class="gen-nome">{{ titolo }}</span>
+            <span class="gen-durata">{{ durata }}</span>
+          </button>
+        </li>
+        {% endfor %}
+      </ol>
+      <audio id="gen-audio" preload="none"></audio>
+    </div>
   {% endif %}
 {% endcall %}
 
 <hr style="border-color:var(--c-border-lt);" class="mt-4">
 
+{% endblock %}
+
+{% block styles %}
+<style>
+  /* --- GenerAIzione: player a scaletta, sopra gli stili .onair di amaldi.css --- */
+  .gen-disco {
+    flex: 0 0 auto; width: 96px; aspect-ratio: 1; border-radius: 50%;
+    display: grid; place-items: center;
+    background:
+      radial-gradient(circle, var(--c-accent) 0 30%, #111 30.5% 33%, transparent 33.5%),
+      repeating-radial-gradient(circle, #1b1b1b 0 1.5px, #0a0a0a 1.5px 3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,.5);
+    animation: onair-spin 6s linear infinite; animation-play-state: paused;
+  }
+  .gen-disco span { font: 700 1rem/1 var(--font-head); color: #fff; letter-spacing: .04em; }
+  .gen .onair-live { background: rgba(255,255,255,.12); box-shadow: none; }
+  .gen .onair-live-dot { animation-play-state: paused; opacity: .5; }
+  .gen .onair-eq span { animation-play-state: paused; opacity: .35; }
+  /* in onda: tutto si muove, la pillola diventa rossa */
+  .gen.in-onda .gen-disco,
+  .gen.in-onda .onair-live-dot,
+  .gen.in-onda .onair-eq span { animation-play-state: running; opacity: 1; }
+  .gen.in-onda .onair-live { background: #d92d20; box-shadow: 0 0 0 3px rgba(217,45,32,.2); }
+
+  .gen-ora { display: flex; align-items: center; gap: .9rem; }
+  .gen-play {
+    flex: 0 0 auto; width: 48px; height: 48px; border-radius: 50%; border: 0;
+    display: grid; place-items: center; font-size: 1.6rem; color: #fff;
+    background: var(--c-accent); transition: background var(--transition), transform var(--transition);
+  }
+  .gen-play:hover, .gen-play:focus-visible { background: var(--c-accent-lt); transform: scale(1.06); }
+  .gen-titolo { font-weight: 600; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gen-tempo { font: 500 .75rem/1 var(--font-mono); color: var(--c-subtle); white-space: nowrap; }
+  .gen-barra { width: 100%; accent-color: var(--c-accent-lt); margin-top: .35rem; }
+  .gen-eq { height: 18px; margin: .9rem 0 .6rem; }
+
+  .gen-lista { list-style: none; padding: 0; margin: 0; }
+  .gen-traccia {
+    width: 100%; display: flex; align-items: center; gap: .8rem;
+    padding: .6rem .75rem; border: 0; border-radius: var(--radius-sm);
+    background: transparent; color: #d0d5dd; text-align: left;
+    transition: background var(--transition);
+  }
+  .gen-traccia:hover, .gen-traccia:focus-visible { background: rgba(255,255,255,.07); color: #fff; }
+  .gen-traccia[aria-current="true"] { background: rgba(232,87,26,.18); color: #fff; }
+  .gen-traccia[aria-current="true"] .gen-n { color: var(--c-accent-lt); }
+  .gen-n { font: 600 .8rem/1 var(--font-mono); color: var(--c-subtle); width: 1.2em; }
+  .gen-nome { flex: 1; font-weight: 500; }
+  .gen-durata { font: 500 .75rem/1 var(--font-mono); color: var(--c-subtle); }
+  @media (prefers-reduced-motion: reduce) {
+    .gen-disco, .gen .onair-eq span { animation: none; }
+  }
+
+  .opuscolo-foglio { background: #fff; margin: 0 auto; width: fit-content; max-width: 100%; }
+  #opuscolo-pagina { color: var(--c-muted); font-size: .9rem; min-width: 4.5em; text-align: center; }
+  /* tutto schermo: classe propria, così funziona anche dove requestFullscreen manca (iPhone) */
+  .opuscolo-pieno {
+    position: fixed; inset: 0; z-index: 2000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 1rem; background: #101828;
+  }
+  .opuscolo-pieno .opuscolo-barra { margin-top: .75rem !important; }
+  .opuscolo-pieno #opuscolo-pagina { color: #d0d5dd; }
+  .opuscolo-pieno .btn { color: #fff; border-color: rgba(255,255,255,.45); }
+  .opuscolo-pieno .btn:hover { background: rgba(255,255,255,.12); }
+</style>
 {% endblock %}
 
 {% block scripts %}
@@ -171,19 +312,27 @@
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+  var viewer = document.getElementById('opuscolo-viewer');
   var canvas = document.getElementById('opuscolo');
   var etichetta = document.getElementById('opuscolo-pagina');
-  var pdf = null, pagina = 1, inCorso = null;
+  var bottonePieno = document.getElementById('opuscolo-pieno');
+  var pdf = null, pagina = 1, inCorso = null, aPieno = false;
 
   function disegna() {
+    if (!pdf) return;
     pdf.getPage(pagina).then(function (p) {
-      // la pagina si adatta alla larghezza della colonna, nitida anche su schermi retina
-      var dpr = window.devicePixelRatio || 1;
-      var scala = canvas.parentElement.clientWidth / p.getViewport({ scale: 1 }).width;
+      // normale: larghezza della colonna; tutto schermo: pagina intera nella finestra
+      var base = p.getViewport({ scale: 1 });
+      var scala = aPieno
+        ? Math.min((window.innerWidth - 32) / base.width, (window.innerHeight - 90) / base.height)
+        : Math.min(viewer.clientWidth / base.width, window.innerHeight * .8 / base.height);
+      var dpr = window.devicePixelRatio || 1;  // nitida anche su schermi retina
       var vista = p.getViewport({ scale: scala * dpr });
       if (inCorso) inCorso.cancel();
       canvas.width = vista.width;
       canvas.height = vista.height;
+      canvas.style.width = Math.floor(base.width * scala) + 'px';
+      canvas.style.height = Math.floor(base.height * scala) + 'px';
       inCorso = p.render({ canvasContext: canvas.getContext('2d'), viewport: vista });
       inCorso.promise.catch(function () {});  // annullata da un cambio pagina più rapido
       etichetta.textContent = pagina + ' / ' + pdf.numPages;
@@ -198,18 +347,112 @@
     disegna();
   }
 
+  function pieno(on) {
+    aPieno = on;
+    viewer.classList.toggle('opuscolo-pieno', on);
+    document.body.style.overflow = on ? 'hidden' : '';
+    bottonePieno.setAttribute('aria-pressed', on);
+    bottonePieno.setAttribute('aria-label', on ? 'Esci dal tutto schermo' : 'Sfoglia a tutto schermo');
+    bottonePieno.firstElementChild.className = on ? 'bi bi-fullscreen-exit' : 'bi bi-arrows-fullscreen';
+    disegna();
+  }
+
+  bottonePieno.addEventListener('click', function () {
+    if (!aPieno) {
+      pieno(true);
+      if (viewer.requestFullscreen) viewer.requestFullscreen().catch(function () {});
+    } else if (document.fullscreenElement) {
+      document.exitFullscreen();  // il resto lo fa fullscreenchange
+    } else {
+      pieno(false);
+    }
+  });
+  document.addEventListener('fullscreenchange', function () {
+    if (!document.fullscreenElement && aPieno) pieno(false);
+  });
+
+  // sfogliare col dito
+  var x0 = null;
+  canvas.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+  canvas.addEventListener('touchend', function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 40) vai(dx < 0 ? 1 : -1);
+    x0 = null;
+  });
+
   document.getElementById('opuscolo-prec').addEventListener('click', function () { vai(-1); });
   document.getElementById('opuscolo-succ').addEventListener('click', function () { vai(1); });
   document.addEventListener('keydown', function (e) {
     if (e.target.closest('input, textarea, audio')) return;
     if (e.key === 'ArrowLeft') vai(-1);
     if (e.key === 'ArrowRight') vai(1);
+    if (e.key === 'Escape' && aPieno && !document.fullscreenElement) pieno(false);
   });
   var timer;
-  window.addEventListener('resize', function () { clearTimeout(timer); timer = setTimeout(function () { if (pdf) disegna(); }, 200); });
+  window.addEventListener('resize', function () { clearTimeout(timer); timer = setTimeout(disegna, 200); });
 
   pdfjsLib.getDocument("{{ url_for('static', filename='data/opuscolo-amaldi.pdf') }}").promise
     .then(function (doc) { pdf = doc; disegna(); });
+})();
+
+/* GenerAIzione: un solo <audio>, la scaletta sceglie la sorgente */
+(function () {
+  var card = document.getElementById('gen');
+  var audio = document.getElementById('gen-audio');
+  var play = document.getElementById('gen-play');
+  var barra = document.getElementById('gen-barra');
+  var tempo = document.getElementById('gen-tempo');
+  var titolo = document.getElementById('gen-titolo');
+  var stato = document.getElementById('gen-stato');
+  var tracce = Array.prototype.slice.call(card.querySelectorAll('.gen-traccia'));
+  var attuale = -1;
+
+  function mmss(t) {
+    t = Math.floor(t || 0);
+    return Math.floor(t / 60) + ':' + ('0' + t % 60).slice(-2);
+  }
+
+  function scegli(i) {
+    if (i !== attuale) {
+      attuale = i;
+      audio.src = tracce[i].dataset.src;
+      titolo.textContent = (i + 1) + '. ' + tracce[i].querySelector('.gen-nome').textContent;
+      tracce.forEach(function (t, j) { t.setAttribute('aria-current', j === i); });
+      barra.disabled = false;
+    }
+    audio.play().catch(function () { if (audio.error) stato.textContent = 'Non riproducibile'; });
+  }
+
+  tracce.forEach(function (t, i) {
+    t.addEventListener('click', function () {
+      if (i === attuale && !audio.paused) audio.pause(); else scegli(i);
+    });
+  });
+  play.addEventListener('click', function () {
+    if (attuale < 0) scegli(0);
+    else if (audio.paused) scegli(attuale);
+    else audio.pause();
+  });
+
+  function aggiorna() {
+    var inOnda = !audio.paused;
+    card.classList.toggle('in-onda', inOnda);
+    play.firstElementChild.className = inOnda ? 'bi bi-pause-fill' : 'bi bi-play-fill';
+    play.setAttribute('aria-label', inOnda ? 'Pausa' : 'Riproduci');
+    stato.textContent = inOnda ? 'On air' : (attuale < 0 ? '4 puntate' : 'In pausa');
+  }
+  audio.addEventListener('play', aggiorna);
+  audio.addEventListener('pause', aggiorna);
+  audio.addEventListener('loadedmetadata', function () { barra.max = Math.floor(audio.duration); });
+  audio.addEventListener('timeupdate', function () {
+    barra.value = Math.floor(audio.currentTime);
+    tempo.textContent = mmss(audio.currentTime) + ' / ' + mmss(audio.duration);
+  });
+  audio.addEventListener('ended', function () {
+    if (attuale < tracce.length - 1) scegli(attuale + 1); else aggiorna();
+  });
+  barra.addEventListener('input', function () { audio.currentTime = barra.value; });
 })();
 </script>
 {% endblock %}
