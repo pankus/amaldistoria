@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}AmaldiStoria — Materiali{% endblock %}
+
+{% block app_content %}
+
+<div class="page-banner">
+  <div class="page-banner-inner text-center">
+    <span class="section-label mb-2 d-block">Centro di documentazione</span>
+    <h1>Materiali</h1>
+    <p class="lead">Documentari, opuscoli e podcast nati dal progetto</p>
+  </div>
+</div>
+
+{# Intro #}
+<div class="row mb-5">
+  <div class="col-lg-8">
+    <p class="prose dropcap">
+      Con l'obiettivo di condividere i risultati del lavoro svolto e di mettersi in relazione con esperienze
+      analoghe, il Centro di documentazione ha realizzato una serie di materiali, qui pubblicati, che
+      restituiscono alla comunità scolastica dell'Amaldi e al territorio di Tor Bella Monaca il percorso e gli
+      esiti del progetto.
+    </p>
+  </div>
+</div>
+
+{# Macro per materiale: il testo arriva dal caller, il media dalla colonna laterale #}
+{% macro materiale(etichetta, titolo, link, azione, flip=false, id=none) %}
+<hr style="border-color:var(--c-border-lt);" class="my-4">
+<div class="row align-items-center g-4" {% if id %}id="{{ id }}" style="scroll-margin-top:90px;"{% endif %}>
+  <div class="col-md-7 {% if flip %}order-md-2{% endif %}">
+    <span class="section-label">{{ etichetta }}</span>
+    <h2 class="featurette-heading mt-1">{{ titolo }}</h2>
+    {{ caller('testo') }}
+    <a class="btn btn-outline-primary mt-2" target="_blank" rel="noopener" href="{{ link }}" {% if link.startswith('/') %}download{% endif %}>{{ azione }}</a>
+  </div>
+  <div class="col-md-5 {% if flip %}order-md-1{% endif %}">
+    {{ caller('media') }}
+  </div>
+</div>
+{% endmacro %}
+
+{% set cornice = "border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow);" %}
+
+{% call(parte) materiale("Documentario · 2024", "Un liceo di periferia. Storie e voci dell'Amaldi (1989-2024)",
+    "https://drive.google.com/file/d/1YR7Pzu1cGUCq4RA1--uUrksjgMeLS2TL/view", "Guarda il video") %}
+  {% if parte == 'testo' %}
+    <p class="prose">
+      Un documentario, della durata di circa 20 minuti, costruito con le voci di chi ha vissuto l'Amaldi come
+      studente/ssa o docente. Il prodotto è stato realizzato in modo collettivo e partecipato dagli studenti e
+      dalle studentesse che hanno preso parte al pcto nel 2024.
+    </p>
+    <p class="prose">
+      Per un anno i/le partecipanti hanno studiato e messo in pratica la teoria e le tecniche base di ripresa e
+      montaggio video. Grazie alle competenze acquisite, hanno realizzato interviste, le hanno indicizzate,
+      tagliate e montate creando un racconto co-costruito dalle persone che frequentano il liceo oggi e che
+      l'hanno frequentato ieri.
+    </p>
+    <p class="prose">
+      Il video documentario ripropone anche alcuni brani di un video musicale girato nel 1999 e di un
+      audiovisivo del 2007.
+    </p>
+  {% else %}
+    <div class="ratio ratio-16x9" style="{{ cornice }}">
+      <iframe src="https://drive.google.com/file/d/1YR7Pzu1cGUCq4RA1--uUrksjgMeLS2TL/preview"
+              title="Un liceo di periferia" allow="autoplay" allowfullscreen></iframe>
+    </div>
+  {% endif %}
+{% endcall %}
+
+{% call(parte) materiale("Opuscolo · 2025", "Dalla scuola al quartiere. L'Amaldi (si) racconta",
+    url_for('static', filename='data/opuscolo-amaldi.pdf'), "Scarica l'opuscolo (PDF)", flip=true) %}
+  {% if parte == 'testo' %}
+    <p class="prose">
+      L'opuscolo restituisce il lavoro fatto nel pcto del 2025, durante il quale studenti e studentesse hanno
+      studiato la mappa del territorio attorno all'Amaldi, un paesaggio che vivono quotidianamente,
+      riconoscendo i luoghi che frequentano o che evitano, ma anche immaginando gli spazi che desiderano e che
+      vorrebbero trasformare.
+    </p>
+    <p class="prose">
+      Durante alcune esplorazioni, hanno attraversato e documentato il territorio, reperendo e costruendo fonti.
+      Sono poi tornati sulla mappa, che è stata allora ridisegnata attraverso l'esperienza fatta e la
+      documentazione raccolta, intrecciando la città reale con quella immaginata.
+    </p>
+  {% else %}
+    <div style="{{ cornice }}background:#fff;">
+      <canvas id="opuscolo" class="d-block w-100" role="img" aria-label="Opuscolo, pagina 1"></canvas>
+    </div>
+    <div class="d-flex justify-content-center align-items-center gap-3 mt-2">
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="opuscolo-prec" aria-label="Pagina precedente">&lsaquo;</button>
+      <span id="opuscolo-pagina" style="color:var(--c-muted);font-size:.9rem;">1 / …</span>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="opuscolo-succ" aria-label="Pagina successiva">&rsaquo;</button>
+    </div>
+  {% endif %}
+{% endcall %}
+
+{% call(parte) materiale("Podcast", "TorBellaTalk: tra torri e parole",
+    "https://archive.org/details/3.-un-quartiere-in-trasformazione/1.la+storia+della+scuola.mp3", "Apri la pagina su Internet Archive", id="torbellatalk") %}
+  {% if parte == 'testo' %}
+    <p class="prose">
+      Un podcast nato dalla collaborazione tra il Centro di documentazione e la
+      <a target="_blank" rel="noopener" href="http://www.scuolapopolaretbm.altervista.org/">Scuola Popolare di Tor Bella Monaca</a>
+      con l'obiettivo di raccontare storie, testimonianze e documenti legati alla vita dell'istituto e del
+      quartiere circostante.
+    </p>
+    <p class="prose">
+      Ogni puntata intreccia ricordi, esperienze e riflessioni, rendendo visibile, accessibile e pubblica la
+      memoria della scuola e del quartiere. Punto di partenza: la convinzione che la memoria sia un processo
+      partecipativo, capace di creare un ponte tra passato e presente, rafforzando il senso di appartenenza a
+      una comunità.
+    </p>
+    <p class="prose">
+      In un quartiere troppo spesso relegato alle cronache nere, questo strumento di ricerca e di comunicazione
+      fa affiorare storie invisibili ai più. La raccolta di voci ha creato occasioni di incontro tra generazioni
+      diverse, tra abitanti e studenti, tra la scuola e le realtà associative del territorio.
+    </p>
+    <p class="prose">
+      In un contesto urbano segnato da fragilità sociali e culturali, nel suo piccolo, il progetto ha voluto
+      costruire uno spazio di ascolto e di dialogo affinché la comprensione del passato diventi uno dei motori
+      di rigenerazione del presente.
+    </p>
+    <p><small style="color:var(--c-muted);">
+      Progetto vincitore dell'avviso "Voci dalla Città" - I Edizione, Roma Capitale - Gabinetto del Sindaco,
+      Ufficio di Scopo Politiche Giovanili
+    </small></p>
+  {% else %}
+    <img src="{{ url_for('static', filename='img/materiali/torbellatalk.webp') }}"
+         alt="Copertina del podcast TorBellaTalk: tra torri e parole"
+         class="img-fluid mb-3" style="{{ cornice }}">
+    <iframe src="https://archive.org/embed/3.-un-quartiere-in-trasformazione?playlist=1"
+            title="TorBellaTalk — puntate" width="100%" height="360" frameborder="0" allowfullscreen></iframe>
+  {% endif %}
+{% endcall %}
+
+{% call(parte) materiale("Podcast · 2026", "GenerAIzione in movimento",
+    "https://drive.google.com/drive/folders/1OPBOax5XZVRZqR8jjhmMY_YPIUb7gef-?usp=drive_link", "Cartella Drive", flip=true) %}
+  {% if parte == 'testo' %}
+    <p class="prose">
+      Nel 2026, studenti e studentesse hanno lavorato sul sonoro analizzando fonti orali conservate nel Centro
+      di documentazione e registrando nuove interviste. Il materiale raccolto è confluito in quattro puntate
+      podcast, ideate e realizzate interamente dai/lle partecipanti. Le puntate affrontano alcuni temi che hanno
+      suscitato l'interesse del gruppo: l'impiego dell'intelligenza artificiale nella didattica, la mobilità come
+      questione problematica e cruciale per il territorio metropolitano, e la storia dell'istituto e della sua
+      succursale di Castelverde.
+    </p>
+  {% else %}
+    {% for titolo, durata, file in [
+         ("La nostra generazione", "10:56", "la-nostra-generazione.mp3"),
+         ("Mobilità", "9:06", "mobilita.m4a"),
+         ("Storia della scuola", "11:23", "storia-della-scuola.mp3"),
+         ("Storia del territorio", "8:37", "storia-del-territorio.mp3")] %}
+      <div class="mb-3">
+        <div class="d-flex justify-content-between" style="font-size:.9rem;">
+          <strong>{{ loop.index }}. {{ titolo }}</strong>
+          <span style="color:var(--c-muted);">{{ durata }}</span>
+        </div>
+        <audio controls preload="none" class="w-100" src="{{ url_for('static', filename='data/' ~ file) }}"
+               aria-label="Puntata {{ loop.index }}: {{ titolo }}"></audio>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endcall %}
+
+<hr style="border-color:var(--c-border-lt);" class="mt-4">
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+(function () {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  var canvas = document.getElementById('opuscolo');
+  var etichetta = document.getElementById('opuscolo-pagina');
+  var pdf = null, pagina = 1, inCorso = null;
+
+  function disegna() {
+    pdf.getPage(pagina).then(function (p) {
+      // la pagina si adatta alla larghezza della colonna, nitida anche su schermi retina
+      var dpr = window.devicePixelRatio || 1;
+      var scala = canvas.parentElement.clientWidth / p.getViewport({ scale: 1 }).width;
+      var vista = p.getViewport({ scale: scala * dpr });
+      if (inCorso) inCorso.cancel();
+      canvas.width = vista.width;
+      canvas.height = vista.height;
+      inCorso = p.render({ canvasContext: canvas.getContext('2d'), viewport: vista });
+      inCorso.promise.catch(function () {});  // annullata da un cambio pagina più rapido
+      etichetta.textContent = pagina + ' / ' + pdf.numPages;
+      canvas.setAttribute('aria-label', 'Opuscolo, pagina ' + pagina + ' di ' + pdf.numPages);
+    });
+  }
+
+  function vai(delta) {
+    var nuova = pagina + delta;
+    if (!pdf || nuova < 1 || nuova > pdf.numPages) return;
+    pagina = nuova;
+    disegna();
+  }
+
+  document.getElementById('opuscolo-prec').addEventListener('click', function () { vai(-1); });
+  document.getElementById('opuscolo-succ').addEventListener('click', function () { vai(1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.target.closest('input, textarea, audio')) return;
+    if (e.key === 'ArrowLeft') vai(-1);
+    if (e.key === 'ArrowRight') vai(1);
+  });
+  var timer;
+  window.addEventListener('resize', function () { clearTimeout(timer); timer = setTimeout(function () { if (pdf) disegna(); }, 200); });
+
+  pdfjsLib.getDocument("{{ url_for('static', filename='data/opuscolo-amaldi.pdf') }}").promise
+    .then(function (doc) { pdf = doc; disegna(); });
+})();
+</script>
+{% endblock %}

@@ -85,6 +85,11 @@ def voci():
     return render_template('voci.html')
 
 
+@bp.route('/materiali')
+def materiali():
+    return render_template('materiali.html')
+
+
 @bp.route('/test')
 def test():
     return render_template('test.html')

@@ -61,59 +61,108 @@
 
 
 {# ============================================================
-   ESPLORA — navigazione sezioni
+   ESPLORA — navigazione sezioni, e a destra TorBellaTalk in evidenza
    ============================================================ #}
 <section class="home-section">
   <div class="container">
-    <span class="home-section-label">Esplora</span>
-    <div class="row g-3">
+    <div class="row g-4">
 
-      <div class="col-md-4">
-        <a href="{{ url_for('main.serie_generale') }}" class="home-nav-card">
-          <div class="home-nav-card-icon">
-            <i class="bi bi-bar-chart-line"></i>
+      <div class="col-lg-8 d-flex flex-column">
+        <span class="home-section-label">Esplora</span>
+        <div class="row g-3 flex-grow-1">
+
+          <div class="col-md-4">
+            <a href="{{ url_for('main.serie_generale') }}" class="home-nav-card">
+              <div class="home-nav-card-icon">
+                <i class="bi bi-bar-chart-line"></i>
+              </div>
+              <div class="home-nav-card-title">Dati statistici</div>
+              <p class="home-nav-card-desc">
+                Serie storiche sugli iscritti per anno scolastico: genere, nazionalità,
+                indirizzo di studi, abbandoni e trasferimenti dal 1992 ad oggi.
+              </p>
+              <span class="home-nav-card-arrow">
+                Consulta i dati <i class="bi bi-arrow-right"></i>
+              </span>
+            </a>
           </div>
-          <div class="home-nav-card-title">Dati statistici</div>
-          <p class="home-nav-card-desc">
-            Serie storiche sugli iscritti per anno scolastico: genere, nazionalità,
-            indirizzo di studi, abbandoni e trasferimenti dal 1992 ad oggi.
-          </p>
-          <span class="home-nav-card-arrow">
-            Consulta i dati <i class="bi bi-arrow-right"></i>
-          </span>
-        </a>
+
+          <div class="col-md-4">
+            <a href="{{ url_for('main.mapdata') }}" class="home-nav-card">
+              <div class="home-nav-card-icon">
+                <i class="bi bi-map"></i>
+              </div>
+              <div class="home-nav-card-title">Mappe interattive</div>
+              <p class="home-nav-card-desc">
+                Distribuzione geografica degli iscritti per anno scolastico,
+                con heatmap, cluster e analisi spaziale del rapporto scuola–territorio.
+              </p>
+              <span class="home-nav-card-arrow">
+                Esplora le mappe <i class="bi bi-arrow-right"></i>
+              </span>
+            </a>
+          </div>
+
+          <div class="col-md-4">
+            <a href="{{ url_for('main.voci') }}" class="home-nav-card">
+              <div class="home-nav-card-icon">
+                <i class="bi bi-mic"></i>
+              </div>
+              <div class="home-nav-card-title">Voci della memoria</div>
+              <p class="home-nav-card-desc">
+                Testimonianze video di docenti ed ex-studenti raccolte nel rispetto
+                delle buone pratiche per la storia orale (AISO).
+              </p>
+              <span class="home-nav-card-arrow">
+                Ascolta le voci <i class="bi bi-arrow-right"></i>
+              </span>
+            </a>
+          </div>
+
+        </div>
       </div>
 
-      <div class="col-md-4">
-        <a href="{{ url_for('main.mapdata') }}" class="home-nav-card">
-          <div class="home-nav-card-icon">
-            <i class="bi bi-map"></i>
+      <div class="col-lg-4 d-flex flex-column">
+        <span class="home-section-label">In evidenza</span>
+        <div class="onair">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <a href="{{ url_for('main.materiali') }}#torbellatalk" class="onair-cover" aria-label="Ascolta TorBellaTalk">
+              <span class="onair-vinyl" aria-hidden="true"></span>
+              <img src="{{ url_for('static', filename='img/materiali/torbellatalk.webp') }}"
+                   alt="Copertina del podcast TorBellaTalk: tra torri e parole">
+            </a>
+            <div>
+              <span class="onair-live"><span class="onair-live-dot"></span>On air</span>
+              <h2 class="onair-title">TorBellaTalk</h2>
+              <p class="onair-sub">tra torri e parole</p>
+            </div>
           </div>
-          <div class="home-nav-card-title">Mappe interattive</div>
-          <p class="home-nav-card-desc">
-            Distribuzione geografica degli iscritti per anno scolastico,
-            con heatmap, cluster e analisi spaziale del rapporto scuola–territorio.
-          </p>
-          <span class="home-nav-card-arrow">
-            Esplora le mappe <i class="bi bi-arrow-right"></i>
-          </span>
-        </a>
-      </div>
 
-      <div class="col-md-4">
-        <a href="{{ url_for('main.voci') }}" class="home-nav-card">
-          <div class="home-nav-card-icon">
-            <i class="bi bi-mic"></i>
-          </div>
-          <div class="home-nav-card-title">Voci della memoria</div>
-          <p class="home-nav-card-desc">
-            Testimonianze video di docenti ed ex-studenti raccolte nel rispetto
-            delle buone pratiche per la storia orale (AISO).
-          </p>
-          <span class="home-nav-card-arrow">
-            Ascolta le voci <i class="bi bi-arrow-right"></i>
+          <span class="onair-stamp">
+            <i class="bi bi-award-fill"></i>
+            Vincitore · <em>Voci dalla Città</em> · I edizione
           </span>
-        </a>
+
+          <p class="onair-text">
+            Il podcast con la Scuola Popolare di Tor Bella Monaca: storie e voci della scuola
+            e del quartiere, premiato da Roma Capitale.
+          </p>
+
+          <div class="onair-eq" aria-hidden="true">
+            {% for i in range(28) %}<span style="animation-delay:-{{ (i * 137) % 1000 }}ms"></span>{% endfor %}
+          </div>
+          <p class="onair-meta">6 puntate · oltre 3 ore di voci</p>
+
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <a href="{{ url_for('main.materiali') }}#torbellatalk" class="onair-btn">
+              <i class="bi bi-play-fill"></i> Ascolta
+            </a>
+            <a href="https://www.comune.roma.it/web/it/notizia/giovani-pubblicato-avviso-voci-dalla-citta-2026.page"
+               target="_blank" rel="noopener" class="onair-link">
+              L'avviso <i class="bi bi-box-arrow-up-right"></i>
+            </a>
+          </div>
+        </div>
       </div>
 
     </div>
