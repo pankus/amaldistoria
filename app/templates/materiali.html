@@ -26,8 +26,8 @@
 {# Macro per materiale: il testo arriva dal caller, il media dalla colonna accanto.
    Il media ha di norma più spazio del testo; testo=7 inverte le proporzioni. #}
 {% macro materiale(etichetta, titolo, link, azione, flip=false, id=none, testo=5) %}
-<hr style="border-color:var(--c-border-lt);" class="my-4">
-<div class="row align-items-center g-4" {% if id %}id="{{ id }}" style="scroll-margin-top:90px;"{% endif %}>
+<hr class="materiale-sep">
+<div class="row align-items-start g-4" {% if id %}id="{{ id }}" style="scroll-margin-top:90px;"{% endif %}>
   <div class="col-md-{{ testo }} {% if flip %}order-md-2{% endif %}">
     <span class="section-label">{{ etichetta }}</span>
     <h2 class="featurette-heading mt-1">{{ titolo }}</h2>
@@ -44,7 +44,7 @@
 
 {% set cornice = "border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow);" %}
 {# ID YouTube del documentario: finché è none si vede il segnaposto "Video in arrivo" #}
-{% set youtube_documentario = none %}
+{% set youtube_documentario = "sB80Kcvr-UA" %}
 
 {% call(parte) materiale("Documentario · 2024", "Un liceo di periferia. Storie e voci dell'Amaldi (1989-2024)",
     ("https://www.youtube.com/watch?v=" ~ youtube_documentario) if youtube_documentario else none,
@@ -103,11 +103,16 @@
       <div class="opuscolo-foglio" style="{{ cornice }}">
         <canvas id="opuscolo" class="d-block" role="img" aria-label="Opuscolo, pagina 1"></canvas>
       </div>
-      <div class="opuscolo-barra d-flex justify-content-center align-items-center gap-3 mt-2">
-        <button type="button" class="btn btn-sm btn-outline-secondary" id="opuscolo-prec" aria-label="Pagina precedente">&lsaquo;</button>
-        <span id="opuscolo-pagina">1 / …</span>
-        <button type="button" class="btn btn-sm btn-outline-secondary" id="opuscolo-succ" aria-label="Pagina successiva">&rsaquo;</button>
-        <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="opuscolo-pieno"
+      <div class="opuscolo-barra mt-3">
+        <button type="button" class="opuscolo-tasto" id="opuscolo-prec" aria-label="Pagina precedente" disabled>
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <span id="opuscolo-pagina" aria-live="polite">1 / …</span>
+        <button type="button" class="opuscolo-tasto" id="opuscolo-succ" aria-label="Pagina successiva">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+        <span class="opuscolo-sep" aria-hidden="true"></span>
+        <button type="button" class="opuscolo-tasto" id="opuscolo-pieno"
                 aria-label="Sfoglia a tutto schermo" aria-pressed="false">
           <i class="bi bi-arrows-fullscreen"></i>
         </button>
@@ -235,7 +240,7 @@
   {% endif %}
 {% endcall %}
 
-<hr style="border-color:var(--c-border-lt);" class="mt-4">
+<hr class="materiale-sep mb-0">
 
 {% endblock %}
 
@@ -290,8 +295,30 @@
     .gen-disco, .gen .onair-eq span { animation: none; }
   }
 
+  /* stacco fra i materiali: linea discreta, lo spazio fa la separazione */
+  .materiale-sep { border-color: var(--c-border-lt); margin: clamp(2.5rem, 6vw, 4.5rem) 0; }
   .opuscolo-foglio { background: #fff; margin: 0 auto; width: fit-content; max-width: 100%; }
-  #opuscolo-pagina { color: var(--c-muted); font-size: .9rem; min-width: 4.5em; text-align: center; }
+  /* barra a pillola: tasti tondi, contatore in mono, accento al passaggio */
+  .opuscolo-barra {
+    display: flex; align-items: center; gap: .25rem;
+    width: fit-content; margin-left: auto; margin-right: auto; padding: .3rem;
+    background: var(--c-surface); border: 1px solid var(--c-border-lt);
+    border-radius: 999px; box-shadow: var(--shadow-sm);
+  }
+  .opuscolo-tasto {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2.25rem; height: 2.25rem; padding: 0;
+    border: 0; border-radius: 50%; background: transparent; color: var(--c-ink-2);
+    transition: background var(--transition), color var(--transition);
+  }
+  .opuscolo-tasto:hover:not(:disabled) { background: var(--c-accent-bg); color: var(--c-accent); }
+  .opuscolo-tasto:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+  .opuscolo-tasto:disabled { color: var(--c-border); cursor: default; }
+  #opuscolo-pagina {
+    font: 500 .85rem/1 var(--font-mono); color: var(--c-muted);
+    min-width: 4.5em; text-align: center; font-variant-numeric: tabular-nums;
+  }
+  .opuscolo-sep { width: 1px; height: 1.25rem; background: var(--c-border-lt); margin: 0 .25rem; }
   /* tutto schermo: classe propria, così funziona anche dove requestFullscreen manca (iPhone) */
   .opuscolo-pieno {
     position: fixed; inset: 0; z-index: 2000;
@@ -300,8 +327,11 @@
   }
   .opuscolo-pieno .opuscolo-barra { margin-top: .75rem !important; }
   .opuscolo-pieno #opuscolo-pagina { color: #d0d5dd; }
-  .opuscolo-pieno .btn { color: #fff; border-color: rgba(255,255,255,.45); }
-  .opuscolo-pieno .btn:hover { background: rgba(255,255,255,.12); }
+  .opuscolo-pieno .opuscolo-barra { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.15); box-shadow: none; }
+  .opuscolo-pieno .opuscolo-tasto { color: #fff; }
+  .opuscolo-pieno .opuscolo-tasto:hover:not(:disabled) { background: rgba(255,255,255,.14); color: #fff; }
+  .opuscolo-pieno .opuscolo-tasto:disabled { color: rgba(255,255,255,.25); }
+  .opuscolo-pieno .opuscolo-sep { background: rgba(255,255,255,.2); }
 </style>
 {% endblock %}
 
@@ -316,6 +346,8 @@
   var canvas = document.getElementById('opuscolo');
   var etichetta = document.getElementById('opuscolo-pagina');
   var bottonePieno = document.getElementById('opuscolo-pieno');
+  var prec = document.getElementById('opuscolo-prec');
+  var succ = document.getElementById('opuscolo-succ');
   var pdf = null, pagina = 1, inCorso = null, aPieno = false;
 
   function disegna() {
@@ -337,6 +369,8 @@
       inCorso.promise.catch(function () {});  // annullata da un cambio pagina più rapido
       etichetta.textContent = pagina + ' / ' + pdf.numPages;
       canvas.setAttribute('aria-label', 'Opuscolo, pagina ' + pagina + ' di ' + pdf.numPages);
+      prec.disabled = pagina === 1;
+      succ.disabled = pagina === pdf.numPages;
     });
   }
 
@@ -381,8 +415,8 @@
     x0 = null;
   });
 
-  document.getElementById('opuscolo-prec').addEventListener('click', function () { vai(-1); });
-  document.getElementById('opuscolo-succ').addEventListener('click', function () { vai(1); });
+  prec.addEventListener('click', function () { vai(-1); });
+  succ.addEventListener('click', function () { vai(1); });
   document.addEventListener('keydown', function (e) {
     if (e.target.closest('input, textarea, audio')) return;
     if (e.key === 'ArrowLeft') vai(-1);
