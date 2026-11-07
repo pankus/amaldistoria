@@ -75,10 +75,6 @@
   {# ==================== MAPPA ==================== #}
   <div class="col-lg-9">
     <div id="map-time" style="height:560px;width:100%;border-radius:var(--radius-md);border:1px solid var(--c-border-lt);box-shadow:var(--shadow);"></div>
-    <div class="map-info-box mt-2" style="font-size:.78rem;color:var(--c-muted);">
-      © <a href="https://www.openstreetmap.org/copyright" target="_blank" style="color:inherit;">OpenStreetMap</a>
-      contributors © <a href="https://carto.com/attributions" target="_blank" style="color:inherit;">CARTO</a>
-    </div>
   </div>
 
 </div>
@@ -125,16 +121,16 @@
   /* ---- Tiles ---- */
   var TILES = {
     'carto-light': L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-      { maxZoom: 19, subdomains: 'abcd' }
+      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key={apikey}',
+      { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>', maxZoom: 19, subdomains: 'abcd', apikey: 'cb1_4dfh_1_718d897734f3b66b9ae41af2' }
     ),
     'carto-dark': L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-      { maxZoom: 19, subdomains: 'abcd' }
+      'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key={apikey}',
+      { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>', maxZoom: 19, subdomains: 'abcd', apikey: 'cb1_4dfh_1_718d897734f3b66b9ae41af2' }
     ),
     'osm': L.tileLayer(
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      { maxZoom: 19 }
+      { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 19 }
     )
   };
 

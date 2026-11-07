@@ -584,16 +584,18 @@ document.addEventListener('DOMContentLoaded', function() {
       maxZoom: 19
     });
 
-    var cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    var cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key={apikey}', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> © <a href="https://carto.com/attributions">CARTO</a>',
       maxZoom: 19,
-      subdomains: 'abcd'
+      subdomains: 'abcd',
+      apikey: 'cb1_4dfh_1_718d897734f3b66b9ae41af2'
     });
 
-    var cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    var cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key={apikey}', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> © <a href="https://carto.com/attributions">CARTO</a>',
       maxZoom: 19,
-      subdomains: 'abcd'
+      subdomains: 'abcd',
+      apikey: 'cb1_4dfh_1_718d897734f3b66b9ae41af2'
     });
 
     // Inizializza mappa con OSM come default

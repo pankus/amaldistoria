@@ -103,10 +103,6 @@
         <li><span class="layer-dot" style="background:#a61717;border-radius:2px;"></span>Liceo Amaldi</li>
         <li><span class="layer-dot" style="background:#5b8fa8;border-radius:2px;"></span>Succursali</li>
       </ul>
-      <span class="ms-auto" style="font-size:.72rem;color:var(--c-muted);">
-        © <a href="https://www.openstreetmap.org/copyright" target="_blank" style="color:inherit;">OpenStreetMap</a>
-        contributors © <a href="https://carto.com/attributions" target="_blank" style="color:inherit;">CARTO</a>
-      </span>
     </div>
   </div>
 
@@ -162,17 +158,17 @@
 
   /* ---- Basemap tiles ---- */
   var TILES = {
-    'osm': L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-      { maxZoom: 19, subdomains: 'abcd' }
+    'carto-light': L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key={apikey}',
+      { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>', maxZoom: 19, subdomains: 'abcd', apikey: 'cb1_4dfh_1_718d897734f3b66b9ae41af2' }
     ),
     'carto-dark': L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-      { maxZoom: 19, subdomains: 'abcd' }
+      'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key={apikey}',
+      { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>', maxZoom: 19, subdomains: 'abcd', apikey: 'cb1_4dfh_1_718d897734f3b66b9ae41af2' }
     ),
     'osm': L.tileLayer(
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      { maxZoom: 19 }
+      { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 19 }
     )
   };
 
